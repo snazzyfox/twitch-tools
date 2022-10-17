@@ -2,40 +2,15 @@
 
 A random collection of tools for Twitch streamers and mods
 
-## Install the dependencies
-```bash
-yarn
-# or
+If you want to access the tools, [go here](https://snazzyfox.github.io/twitch-tools)
+
+## Notes for developers
+
+This is a completely in-browser tool. There are no servers. The main site serves as a configuration tool, and generates URLs where all settings are encoded. Moderation tools run in the browser directly.
+
+### To develop these tools
+
+```
 npm install
+npm run dev
 ```
-
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
-```bash
-quasar dev
-```
-
-
-### Lint the files
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-
-### Format the files
-```bash
-yarn format
-# or
-npm run format
-```
-
-
-
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
