@@ -1,0 +1,47 @@
+{
+  "name": "twitch-tools",
+  "version": "0.0.1",
+  "description": "A random collection of tools for Twitch streamers and mods",
+  "productName": "Snazzy's Twitch Tools",
+  "author": "SnazzyFox <12706268+snazzyfox@users.noreply.github.com>",
+  "private": false,
+  "scripts": {
+    "dev": "quasar dev",
+    "lint": "eslint --ext .js,.ts,.vue ./",
+    "format": "prettier --write \"**/*.{js,ts,vue,,html,md,json}\" --ignore-path .gitignore",
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.15.5",
+    "@vueuse/core": "^9.2.0",
+    "axios": "^0.21.1",
+    "comfy.js": "^1.1.16",
+    "core-js": "^3.6.5",
+    "@icholy/duration": "^5.1.0",
+    "jsoncrush": "^1.1.8",
+    "pinia": "^2.0.23",
+    "quasar": "^2.10.0",
+    "twitch-js": "^2.0.0-beta.43",
+    "vue": "^3.2.41",
+    "vue-router": "^4.1.5"
+  },
+  "devDependencies": {
+    "@quasar/app-webpack": "^3.6.2",
+    "@types/node": "^18.11.0",
+    "@typescript-eslint/eslint-plugin": "^5.40.0",
+    "@typescript-eslint/parser": "^5.40.0",
+    "eslint": "^8.25.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-vue": "^9.6.0",
+    "prettier": "^2.7.1"
+  },
+  "browserslist": [
+    "last 12 Chrome versions",
+    "last 12 Firefox versions",
+    "last 6 Edge versions"
+  ],
+  "engines": {
+    "node": ">= 14.19",
+    "npm": ">= 6.13.4"
+  }
+}
