@@ -36,7 +36,8 @@ export interface TimerWidgetOptions {
 }
 
 interface TimerData {
-  endTime: number;
+  time: number;
+  direction: 'up' | 'down';
   title: string;
 }
 interface TimerState {
@@ -46,7 +47,7 @@ interface TimerState {
 }
 
 const props = defineProps<TimerWidgetOptions>();
-const timerData = useStorage<TimerData[]>('timerWidget.timerData', []);
+const timerData = useStorage<TimerData[]>('timer.state', []);
 const state = ref<TimerState[]>([]);
 
 let interval = -1;
@@ -103,8 +104,7 @@ ComfyJs.onCommand = (user, command, message, flags) => {
       if (firstToken === 'off') {
         removeTimer(title);
       } else {
-        const durationMs = Duration.parse(firstToken).milliseconds();
-        addTimer(durationMs, title);
+        addTimer(firstToken, title);
       }
   }
 };
@@ -112,10 +112,10 @@ ComfyJs.onCommand = (user, command, message, flags) => {
 /** Update the state timers are drawn based on */
 function updateState() {
   const now = Date.now();
-  state.value = timerData.value.map(({ endTime, title }) => {
-    const remainingMs = endTime - now;
-    const formatted = formatTime(remainingMs);
-    return { time: formatted, done: remainingMs < 100, title };
+  state.value = timerData.value.map(({ time, title, direction }) => {
+    const durationMs = direction === 'down' ? time - now : now - time;
+    const formatted = formatTime(durationMs);
+    return { time: formatted, done: durationMs < 100, title };
   });
 }
 
@@ -144,14 +144,18 @@ function formatTime(milliseconds: number) {
   }
 }
 
-function addTimer(milliseconds: number, title: string) {
-  const existing = timerData.value.findIndex((t) => t.title === title);
-  const newTimer = {
-    endTime: Date.now() + milliseconds + 500, // extra half second for buffer
-    title: title,
-  };
-  if (existing > -1) {
-    timerData.value[existing] = newTimer;
+function addTimer(duration: string, title: string) {
+  let newTimer: TimerData;
+  if (duration === 'up') {
+    newTimer = { time: Date.now(), direction: 'up', title };
+  } else {
+    const durationMs = Duration.parse(duration).milliseconds();
+    newTimer = { time: Date.now() + durationMs + 500, direction: 'down', title };
+    // extra half second buffer
+  }
+  const existingIndex = timerData.value.findIndex((t) => t.title === title);
+  if (existingIndex > -1) {
+    timerData.value[existingIndex] = newTimer;
     return 'Replaced timer with the same name.';
   } else {
     timerData.value.push(newTimer);
