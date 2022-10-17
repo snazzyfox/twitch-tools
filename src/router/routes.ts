@@ -16,6 +16,11 @@ const routes: RouteRecordRaw[] = [
         path: '/timer',
         component: () => import('pages/TimerConfig.vue'),
       },
+      {
+        name: 'DvdBounceConfig',
+        path: '/dvd-bounce',
+        component: () => import('pages/DvdBounceConfig.vue'),
+      },
     ],
   },
   {
@@ -27,6 +32,11 @@ const routes: RouteRecordRaw[] = [
         name: 'TimerWidget',
         path: '/widget/timer',
         component: () => import('pages/TimerWidget.vue'),
+      },
+      {
+        name: 'DvdBounceWidget',
+        path: '/widget/dvd-bounce',
+        component: () => import('pages/DvdBounceWidget.vue'),
       },
     ],
   },

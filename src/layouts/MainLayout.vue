@@ -7,7 +7,8 @@
       </q-toolbar>
 
       <q-tabs align="left">
-        <q-route-tab :to="{ name: 'TimerConfig' }" label="Timer Overlay" />
+        <q-route-tab to="/timer" label="Timer Overlay" />
+        <q-route-tab to="/dvd-bounce" label="DVD Bounce" />
       </q-tabs>
     </q-header>
 

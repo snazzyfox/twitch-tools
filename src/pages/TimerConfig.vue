@@ -60,12 +60,15 @@
       />
 
       <h5>Customization</h5>
-      <color-picker-input v-model="config.colors.time" label="Time Color" />
-      <color-picker-input v-model="config.colors.done" label="Timer Ended Color" />
-      <color-picker-input v-model="config.colors.border" label="Time Border" />
-      <color-picker-input v-model="config.colors.shadow" label="Time Shadow" />
-      <color-picker-input v-model="config.colors.text" label="Text Color" />
-      <color-picker-input v-model="config.colors.textShadow" label="Text Shadow" />
+
+      <div class="q-gutter-sm row items-start">
+        <color-picker-input v-model="config.colors.time" label="Time Color" />
+        <color-picker-input v-model="config.colors.done" label="Timer Ended Color" />
+        <color-picker-input v-model="config.colors.border" label="Time Border" />
+        <color-picker-input v-model="config.colors.shadow" label="Time Shadow" />
+        <color-picker-input v-model="config.colors.text" label="Text Color" />
+        <color-picker-input v-model="config.colors.textShadow" label="Text Shadow" />
+      </div>
       <q-field label="Text Alignment" v-model="config.textAlign" stack-label>
         <q-btn-toggle
           v-model="config.textAlign"
@@ -106,31 +109,13 @@
     </resizable-preview>
 
     <h5>Broadcaster Software Settings</h5>
-    <p>
-      You can add this widget to OBS (or other similar broadcasting software) with a Browser source
-      using this URL:
-    </p>
-    <q-btn type="submit" :icon="ionCheckmark" @click="generateUrl" color="primary">
-      Generate URL
-    </q-btn>
-    <q-input readonly v-if="widgetUrl" v-model="widgetUrl">
-      <template v-slot:after>
-        <q-btn :icon="ionCopyOutline" @click="copyUrlToClipboard" color="secondary">
-          Copy to Clipboard
-        </q-btn>
-      </template>
-    </q-input>
+    <generate-copy-widget-link route-name="TimerWidget" :config="config" :form="form" />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { QForm, useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
-import { ionCopyOutline } from '@quasar/extras/ionicons-v6';
-import { ionCheckmark } from '@quasar/extras/ionicons-v6';
-import { computed } from 'vue';
-import JSONCrush from 'jsoncrush';
+import { QForm } from 'quasar';
 
 import ColorPickerInput from 'src/components/ColorPickerInput.vue';
 import TwitchSignin from 'src/components/TwitchSignin.vue';
@@ -142,9 +127,8 @@ import TimerWidget from './TimerWidget.vue';
 import SliderField from 'src/components/SliderField.vue';
 import { TwitchAuth } from 'src/stores/auth-store';
 import { useStorage } from '@vueuse/core';
+import GenerateCopyWidgetLink from 'src/components/GenerateCopyWidgetLink.vue';
 
-const quasar = useQuasar();
-const router = useRouter();
 const form = ref({} as QForm);
 
 const config = useStorage('timer.config', {
@@ -166,28 +150,6 @@ const config = useStorage('timer.config', {
   animationSpeed: 1000,
 } as TimerWidgetOptions);
 
-const configString = computed(() => {
-  return JSONCrush.crush(JSON.stringify(config.value));
-});
-
-const widgetUrl = ref('');
-async function generateUrl() {
-  const validated = await form.value.validate(true);
-  if (validated) {
-    widgetUrl.value =
-      window.location.origin +
-      window.location.pathname +
-      router.resolve({ name: 'TimerWidget', query: { cf: configString.value } }).href;
-  } else {
-    widgetUrl.value = '';
-  }
-}
-
-function copyUrlToClipboard() {
-  navigator.clipboard.writeText(widgetUrl.value);
-  quasar.notify({ color: 'primary', message: 'Copied!' });
-}
-
 function autofillChannel(auth: TwitchAuth) {
   if (auth && !config.value.channelName) {
     config.value.channelName = auth.username;
@@ -197,5 +159,5 @@ function autofillChannel(auth: TwitchAuth) {
 
 <style scoped lang="sass">
 .q-form
-  max-width: 480px
+  max-width: 960px
 </style>

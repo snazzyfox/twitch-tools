@@ -16,7 +16,7 @@
       </a>
       <span class="text-warning" v-else>Not Signed In</span>
     </template>
-    <template v-slot:append>
+    <template v-slot:prepend>
       <q-btn
         v-if="store.isTwitchSignedIn"
         label="Sign Out"
@@ -47,7 +47,7 @@ withDefaults(
     hint?: string;
   }>(),
   {
-    label: 'Sign in with Twitch',
+    label: 'Twitch',
   }
 );
 

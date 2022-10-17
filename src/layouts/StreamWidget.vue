@@ -6,16 +6,16 @@
 </template>
 
 <script setup lang="ts">
-import JSONCrush from 'jsoncrush';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { decompressFromEncodedURIComponent } from 'lz-string';
 const widgetData = ref(null as object | null);
 const route = useRoute();
 
 onMounted(() => {
   if (route.query.cf) {
     try {
-      widgetData.value = JSON.parse(JSONCrush.uncrush(route.query.cf.toString()));
+      widgetData.value = JSON.parse(decompressFromEncodedURIComponent(route.query.cf.toString()));
     } catch (e) {
       widgetData.value = null;
     }
