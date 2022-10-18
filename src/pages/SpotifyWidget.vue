@@ -261,7 +261,6 @@ async function startTwitchBot() {
 </script>
 
 <style scoped lang="sass">
-$background-radius: 1vmin
 
 .v-enter-active, .v-leave-active
   transition: all 0.5s ease
@@ -274,7 +273,7 @@ $background-radius: 1vmin
   --main-margin: 12px
   align-items: center
   background: v-bind("$props.player.background.color")
-  border-radius: $background-radius
+  border-radius: 4em
   box-shadow: v-bind("$props.player.background.shadow") 0 0 calc(var(--main-margin) / 2)
   box-sizing: border-box
   display: flex
@@ -282,8 +281,12 @@ $background-radius: 1vmin
   gap: 1%
   padding: 3%
   position: absolute
-  height: calc(100% - 4 * var(--main-margin))
-  width: calc(100% - 4 * var(--main-margin))
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  height: calc(100% - 2 * var(--main-margin))
+  width: calc(100% - 2 * var(--main-margin))
   margin: var(--main-margin)
 
 .spotify-logo

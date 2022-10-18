@@ -1,39 +1,13 @@
 <template>
   <q-page class="q-ma-xl q-gutter-md">
-    <h5>Spotify Player Overlay</h5>
+    <div class="text-h4">Spotify Player Overlay</div>
     <p>
       An overlay that displays what you're playing in Spotify, and optionally react to Twitch chat.
     </p>
 
     <q-form ref="form">
-      <h5>Configuration</h5>
+      <div class="text-h5 q-mb-sm">Configuration</div>
       <spotify-signin v-model="config.spotifyAuth" required />
-      <twitch-signin
-        hint="Sign in to Twitch if you want Twitch related functionalities."
-        v-model="config.twitchBot.twitchAuth"
-        @update:model-value="handleTwitchAuthChange"
-      />
-
-      <q-input
-        v-model="config.twitchBot.channelName"
-        label="Twitch Channel to Monitor"
-        :disable="!config.twitchBot.twitchAuth"
-      />
-      <q-input
-        v-model="config.twitchBot.commands.info.text"
-        label="Command to request song info in chat"
-        hint="Viewers can use this command in chat get a reply with the name and link to the playing song."
-        :disable="!config.twitchBot.twitchAuth || !config.twitchBot.commands.info.enabled"
-        prefix="!"
-      >
-        <template v-slot:before>
-          <q-toggle
-            v-model="config.twitchBot.commands.info.enabled"
-            :disable="!config.twitchBot.twitchAuth"
-          />
-        </template>
-      </q-input>
-
       <slider-field
         v-model="config.player.autohide.delaySeconds"
         :min="1"
@@ -49,17 +23,46 @@
         </template>
       </slider-field>
 
+      <div class="h5 q-mb-sm">Twitch Bot</div>
+      <twitch-signin
+        hint="Sign in if you want Twitch related functionalities"
+        v-model="config.twitchBot.twitchAuth"
+        @update:model-value="handleTwitchAuthChange"
+      />
+      <q-input
+        v-model="config.twitchBot.channelName"
+        label="Twitch Channel to Monitor"
+        :disable="!config.twitchBot.twitchAuth?.token"
+      />
+      <q-input
+        v-model="config.twitchBot.commands.info.text"
+        label="Command to request song info in chat"
+        hint="Viewers can use this command in chat get a reply with the name and link to the playing song."
+        :disable="!config.twitchBot.twitchAuth?.token || !config.twitchBot.commands.info.enabled"
+        prefix="!"
+      >
+        <template v-slot:before>
+          <q-toggle
+            v-model="config.twitchBot.commands.info.enabled"
+            :disable="!config.twitchBot.twitchAuth?.token"
+          />
+        </template>
+      </q-input>
       <q-input
         v-model="config.twitchBot.commands.show.text"
-        label="Command to show overlay"
+        label="Command to show overlay if hidden"
         hint="Viewers can use this command in chat to make the overlay pop up if it's hidden. You can set this to the same command as song info if you want both to happen at the same time."
-        :disable="!config.twitchBot.twitchAuth || !config.twitchBot.commands.show.enabled"
+        :disable="
+          !config.twitchBot.twitchAuth?.token ||
+          !config.twitchBot.commands.show.enabled ||
+          !config.player.autohide.enabled
+        "
         prefix="!"
       >
         <template v-slot:before>
           <q-toggle
             v-model="config.twitchBot.commands.show.enabled"
-            :disable="!config.twitchBot.twitchAuth"
+            :disable="!config.twitchBot.twitchAuth?.token || !config.player.autohide.enabled"
           />
         </template>
       </q-input>
@@ -72,7 +75,11 @@
       </div>
 
       <div class="q-gutter-sm row">
-        <q-toggle :model-value="true" disable label="Track Name" />
+        <q-toggle
+          :model-value="true"
+          label="Track Name"
+          @click="$q.notify('You can\'t turn off the track name.')"
+        />
         <color-picker-input v-model="config.player.trackName.color" label="Color" />
         <slider-field
           v-model="config.player.trackName.size"
