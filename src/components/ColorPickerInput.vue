@@ -3,6 +3,7 @@
     :clearable="clearable"
     :label="label"
     :rules="[(val) => !val || /#[0-9a-z]{8}/.test(val) || 'You must enter a valid color code.']"
+    :disable="disable"
     :model-value="modelValue"
     @update:model-value="(value) => $emit('update:modelValue', value)"
   >
@@ -13,6 +14,7 @@
       <q-color
         no-header
         format-model="hexa"
+        :disable="disable"
         :model-value="modelValue"
         @update:model-value="(value) => $emit('update:modelValue', value)"
       />
@@ -26,6 +28,7 @@ import { mdiSquare } from '@quasar/extras/mdi-v7';
 defineProps<{
   label?: string;
   clearable?: boolean;
+  disable?: boolean;
   modelValue: string;
 }>();
 </script>

@@ -12,11 +12,11 @@ import { useStorage } from '@vueuse/core';
 import { onMounted, onUnmounted, ref } from 'vue';
 import ComfyJs, { OnMessageFlags } from 'comfy.js';
 import Duration from '@icholy/duration';
-import { TwitchAuth } from 'src/stores/auth-store';
+import ComfyJS from 'comfy.js';
 
 export interface TimerWidgetOptions {
   preview?: boolean;
-  twitchAuth?: TwitchAuth;
+  twitchAuth?: { username: string; token: string };
   channelName: string;
   colors: {
     time: string;
@@ -40,6 +40,7 @@ interface TimerData {
   direction: 'up' | 'down';
   title: string;
 }
+
 interface TimerState {
   time: string;
   done: boolean;
@@ -49,6 +50,7 @@ interface TimerState {
 const props = defineProps<TimerWidgetOptions>();
 const timerData = useStorage<TimerData[]>('timer.state', []);
 const state = ref<TimerState[]>([]);
+let connected = false;
 
 let interval = -1;
 onMounted(async () => {
@@ -70,7 +72,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   clearInterval(interval);
-  ComfyJs.Disconnect();
+  if (connected) ComfyJs.Disconnect();
 });
 
 function hasPermissions(userFlags: OnMessageFlags) {
@@ -108,6 +110,8 @@ ComfyJs.onCommand = (user, command, message, flags) => {
       }
   }
 };
+
+ComfyJS.onConnected = () => (connected = true);
 
 /** Update the state timers are drawn based on */
 function updateState() {

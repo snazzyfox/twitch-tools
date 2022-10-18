@@ -33,7 +33,6 @@
         unit="px"
         v-model="config.speed"
       />
-      <!-- Image Speed -->
     </q-form>
     <h5>Preview</h5>
     <resizable-preview :default-width="800" :default-height="400">

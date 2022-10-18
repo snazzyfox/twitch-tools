@@ -2,23 +2,23 @@
   <q-field :label="$props.label" stack-label :hint="$props.hint">
     <template v-slot:default>
       <a
-        v-if="store.isTwitchSignedIn"
-        :href="'https://www.twitch.tv/' + store.twitchAuth?.username"
+        v-if="store.isSignedIn"
+        :href="'https://www.twitch.tv/' + store.currentUser?.login"
         target="_blank"
         rel="noopener noreferrer"
       >
         <q-chip clickable size="small">
           <q-avatar>
-            <img :src="store.currentTwitchUser?.profile_image_url" alt="Profile Image" />
+            <q-img :src="store.currentUser?.profile_image_url" alt="Profile Image" />
           </q-avatar>
-          <span class="username">{{ store.currentTwitchUser?.display_name }}</span>
+          <span class="username">{{ store.currentUser?.display_name }}</span>
         </q-chip>
       </a>
       <span class="text-warning" v-else>Not Signed In</span>
     </template>
     <template v-slot:prepend>
       <q-btn
-        v-if="store.isTwitchSignedIn"
+        v-if="store.isSignedIn"
         label="Sign Out"
         :icon="ionLogOutOutline"
         @click="store.logout()"
@@ -37,12 +37,12 @@
 <script setup lang="ts">
 import { ionLogoTwitch, ionLogOutOutline } from '@quasar/extras/ionicons-v6';
 import { storeToRefs } from 'pinia';
-import authStore, { TwitchAuth } from 'src/stores/auth-store';
+import twitchAuthStore from 'src/stores/TwitchAuth';
 import { watch } from 'vue';
 
 withDefaults(
   defineProps<{
-    modelValue?: TwitchAuth;
+    modelValue?: { username: string; token: string };
     label?: string;
     hint?: string;
   }>(),
@@ -53,12 +53,16 @@ withDefaults(
 
 const emit = defineEmits(['update:modelValue']);
 
-const store = authStore();
-const { twitchAuth } = storeToRefs(store);
+const store = twitchAuthStore();
+const { token } = storeToRefs(store);
 
-watch(twitchAuth, (newAuth) => emit('update:modelValue', newAuth), { immediate: true });
+watch(
+  token,
+  (newToken) => emit('update:modelValue', { token: newToken, username: store.currentUser?.login }),
+  { immediate: true }
+);
 
 function startTwitchSignIn() {
-  window.open(store.getTwitchSigninUrl(), 'TwitchSignin', 'popup,width=480,height=640');
+  window.open(store.getSigninUrl(), 'TwitchSignin', 'popup,width=480,height=640');
 }
 </script>

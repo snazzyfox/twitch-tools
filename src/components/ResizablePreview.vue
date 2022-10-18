@@ -39,8 +39,8 @@ const style = computed(() => ({
   overflow: hidden
 
 .preview-container
-  $stripe1: #00000005
-  $stripe2: #ffffff05
+  $stripe1: #00000015
+  $stripe2: #ffffff15
   background: repeating-linear-gradient(45deg, $stripe1, $stripe1 40px, $stripe2 40px, $stripe2 80px)
   margin: 0
   padding: 0

@@ -125,7 +125,6 @@ import { TimerWidgetOptions } from './widgets/TimerWidget.vue';
 import ResizablePreview from 'src/components/ResizablePreview.vue';
 import TimerWidget from './TimerWidget.vue';
 import SliderField from 'src/components/SliderField.vue';
-import { TwitchAuth } from 'src/stores/auth-store';
 import { useStorage } from '@vueuse/core';
 import GenerateCopyWidgetLink from 'src/components/GenerateCopyWidgetLink.vue';
 
@@ -150,7 +149,7 @@ const config = useStorage('timer.config', {
   animationSpeed: 1000,
 } as TimerWidgetOptions);
 
-function autofillChannel(auth: TwitchAuth) {
+function autofillChannel(auth: { username: string }) {
   if (auth && !config.value.channelName) {
     config.value.channelName = auth.username;
   }

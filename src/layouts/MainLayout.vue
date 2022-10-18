@@ -9,6 +9,7 @@
       <q-tabs align="left">
         <q-route-tab to="/timer" label="Timer Overlay" />
         <q-route-tab to="/dvd-bounce" label="DVD Bounce" />
+        <q-route-tab to="/spotify" label="Spotify Overlay" />
       </q-tabs>
     </q-header>
 

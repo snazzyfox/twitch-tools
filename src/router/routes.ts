@@ -21,6 +21,11 @@ const routes: RouteRecordRaw[] = [
         path: '/dvd-bounce',
         component: () => import('pages/DvdBounceConfig.vue'),
       },
+      {
+        name: 'SpotifyConfig',
+        path: '/spotify',
+        component: () => import('pages/SpotifyConfig.vue'),
+      },
     ],
   },
   {
@@ -38,12 +43,26 @@ const routes: RouteRecordRaw[] = [
         path: '/widget/dvd-bounce',
         component: () => import('pages/DvdBounceWidget.vue'),
       },
+      {
+        name: 'SpotifyWidget',
+        path: '/widget/spotify',
+        component: () => import('pages/SpotifyWidget.vue'),
+      },
     ],
   },
   {
-    name: 'OauthTwitch',
-    path: '/oauth/twitch:params(.*)',
+    name: 'TwitchOauth',
+    path: '/oauth/twitch:params(.*)?',
     component: () => import('layouts/TwitchOauth.vue'),
+  },
+  {
+    name: 'SpotifyOauth',
+    path: '/oauth/spotify',
+    component: () => import('layouts/SpotifyOauth.vue'),
+  },
+  {
+    path: '/%2Foauth%2Fspotify', // spotify returns with the path urlencoded :(
+    redirect: { name: 'SpotifyOauth' },
   },
   {
     name: 'NotFound',

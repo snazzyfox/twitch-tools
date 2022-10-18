@@ -7,7 +7,7 @@
 
 <script setup lang="ts">
 import CenteredCard from 'src/components/CenteredCard.vue';
-import authStore from 'src/stores/auth-store';
+import authStore from 'src/stores/TwitchAuth';
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -16,7 +16,7 @@ const store = authStore();
 
 onMounted(async () => {
   const paramStr = route.hash.slice(1);
-  await store.setTwitchAuth(paramStr);
+  await store.setAuth(paramStr);
   window.close();
 });
 </script>
