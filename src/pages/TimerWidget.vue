@@ -11,7 +11,6 @@
 import { useStorage } from '@vueuse/core';
 import { onMounted, onUnmounted, ref } from 'vue';
 import ComfyJs, { OnMessageFlags } from 'comfy.js';
-import Duration from '@icholy/duration';
 import ComfyJS from 'comfy.js';
 
 export interface TimerWidgetOptions {
@@ -103,11 +102,13 @@ ComfyJs.onCommand = (user, command, message, flags) => {
     case 'timer':
       const [firstToken, ...restTokens] = message.split(/\s+/);
       const title = restTokens.length ? restTokens.join(' ') : '';
+      let error;
       if (firstToken === 'off') {
-        removeTimer(title);
+        error = removeTimer(title);
       } else {
-        addTimer(firstToken, title);
+        error = addTimer(firstToken, title);
       }
+      if (error) reply(user, error);
   }
 };
 
@@ -153,14 +154,23 @@ function addTimer(duration: string, title: string) {
   if (duration === 'up') {
     newTimer = { time: Date.now(), direction: 'up', title };
   } else {
-    const durationMs = Duration.parse(duration).milliseconds();
-    newTimer = { time: Date.now() + durationMs + 500, direction: 'down', title };
-    // extra half second buffer
+    const match = duration.match(/^(?:(?<d>\d+)d)?(?:(?<h>\d+)h)?(?:(?<m>\d+)m)?(?:(?<s>\d+)s)?$/i);
+    if (match && match.groups) {
+      const millis =
+        Number(match.groups.d || 0) * 86_400_000 + // days
+        Number(match.groups.h || 0) * 3_600_000 + // seconds
+        Number(match.groups.m || 0) * 60_000 + // minutes
+        Number(match.groups.s || 0) * 1_000; // seconds
+      // extra half second buffer
+      newTimer = { time: Date.now() + millis + 500, direction: 'down', title };
+    } else {
+      return 'The duration you provided is not valid.';
+    }
   }
   const existingIndex = timerData.value.findIndex((t) => t.title === title);
   if (existingIndex > -1) {
     timerData.value[existingIndex] = newTimer;
-    return 'Replaced timer with the same name.';
+    return 'A timer with that name already exists. I have replaced it.';
   } else {
     timerData.value.push(newTimer);
   }
@@ -174,6 +184,8 @@ function removeTimer(title: string) {
   }
   if (index >= 0 && index < timerData.value.length) {
     timerData.value.splice(index, 1);
+  } else {
+    return 'Cannot find a timer to turn off.';
   }
 }
 </script>
