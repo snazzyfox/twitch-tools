@@ -49,7 +49,9 @@ interface TimerState {
 const props = defineProps<TimerWidgetOptions>();
 const timerData = useStorage<TimerData[]>('timer.state', []);
 const state = ref<TimerState[]>([]);
+const COMMAND_COOLDOWN_MS = 5000;
 let connected = false;
+let cooldownUntil = 0;
 
 let interval = -1;
 onMounted(async () => {
@@ -98,6 +100,8 @@ ComfyJs.onCommand = (user, command, message, flags) => {
     reply(user, "You can't do that.");
     return;
   }
+  const now = Date.now();
+  if (cooldownUntil > now) return;
   switch (command) {
     case 'timer':
       const [firstToken, ...restTokens] = message.split(/\s+/);
@@ -110,6 +114,7 @@ ComfyJs.onCommand = (user, command, message, flags) => {
       }
       if (error) reply(user, error);
   }
+  cooldownUntil = now + COMMAND_COOLDOWN_MS;
 };
 
 ComfyJS.onConnected = () => (connected = true);
