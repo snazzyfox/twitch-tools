@@ -1,7 +1,8 @@
 <template>
   <transition>
     <div v-if="playbackState && visible" :key="playbackState?.item?.name || ''" class="container">
-      <q-resize-observer @resize="handleResize" />
+      <!-- Resize logic only needed in preview mode where vmin doesn't correspond to widget size -->
+      <q-resize-observer v-if="$props.preview" @resize="handleResize" />
       <q-icon :name="mdiSpotify" class="spotify-logo" />
       <img class="album-art" :src="playbackState.item.album.images?.[0].url" alt="Album Art" />
       <div class="text-container">
@@ -105,10 +106,12 @@ const visible = ref(true);
 // progress_ms from spotify jumps back and forth. We keep local progress and only update if out of sync.
 const localProgressMs = ref(0);
 const size = ref(0);
+const artistNames = computed(() => playbackState.value?.item.artists.map((a) => a.name).join(', '));
 
 const MAX_POLL_INTERVAL = 5000;
-const artistNames = computed(() => playbackState.value?.item.artists.map((a) => a.name).join(', '));
-let timeoutId = -1;
+const PROGRESS_UPDATE_INTERVAL = 500;
+let timeoutId: number | undefined;
+let intervalId: number | undefined;
 let comfyJsConnected = false;
 
 onMounted(() => {
@@ -144,18 +147,29 @@ onUnmounted(() => {
   if (comfyJsConnected) {
     ComfyJS.Disconnect();
   }
+  window.clearTimeout(timeoutId);
+  window.clearInterval(intervalId);
 });
 
 function startSpotifyBot() {
-  if (!store.auth || !lastKnownToken.value || props.spotifyAuth?.token !== lastKnownToken.value) {
+  if (
+    props.spotifyAuth &&
+    (!store.auth || !lastKnownToken.value || props.spotifyAuth?.token !== lastKnownToken.value)
+  ) {
     // Only read token from URL if the user passed a new one in. The widget may have refreshed the token itself which will invalidate the URL.
     store.setLocalAuth(props.spotifyAuth);
     lastKnownToken.value = props.spotifyAuth.token;
     spotify.setAccessToken(props.spotifyAuth.token || '');
   } else {
-    spotify.setAccessToken(store.auth.token || '');
+    spotify.setAccessToken(store.auth?.token || '');
   }
   updatePlaybackState();
+  intervalId = window.setInterval(() => {
+    localProgressMs.value = Math.max(
+      localProgressMs.value + PROGRESS_UPDATE_INTERVAL,
+      playbackState.value?.progress_ms || 0
+    );
+  }, PROGRESS_UPDATE_INTERVAL);
 }
 
 async function updatePlaybackState() {
@@ -277,7 +291,7 @@ async function startTwitchBot() {
   box-shadow: v-bind("$props.player.background.shadow") 0 0 calc(var(--main-margin) / 2)
   box-sizing: border-box
   display: flex
-  font-size: v-bind("size / 100 + 'px'")
+  font-size: v-bind("size ? size / 100 + 'px' : '1vh'")
   gap: 1%
   padding: 3%
   position: absolute
