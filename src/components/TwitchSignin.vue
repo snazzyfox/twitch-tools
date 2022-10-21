@@ -1,19 +1,12 @@
 <template>
   <q-field :label="$props.label" stack-label :hint="$props.hint">
     <template v-slot:default>
-      <a
+      <user-label
+        dense
         v-if="store.isSignedIn"
-        :href="'https://www.twitch.tv/' + store.currentUser?.login"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <q-chip clickable size="small">
-          <q-avatar>
-            <q-img :src="store.currentUser?.profile_image_url" alt="Profile Image" />
-          </q-avatar>
-          <span class="username">{{ store.currentUser?.display_name }}</span>
-        </q-chip>
-      </a>
+        :name="store.currentUser?.display_name"
+        :image-src="store.currentUser?.profile_image_url"
+      />
       <span class="text-warning" v-else>Not Signed In</span>
     </template>
     <template v-slot:prepend>
@@ -39,6 +32,7 @@ import { ionLogoTwitch, ionLogOutOutline } from '@quasar/extras/ionicons-v6';
 import { storeToRefs } from 'pinia';
 import twitchAuthStore from 'src/stores/TwitchAuth';
 import { watch } from 'vue';
+import UserLabel from './UserLabel.vue';
 
 withDefaults(
   defineProps<{

@@ -1,14 +1,10 @@
 import { defineStore } from 'pinia';
 import { StorageSerializers, useStorage } from '@vueuse/core';
-import { TwitchResponse, TwitchUser } from 'src/models/twitch';
+import twitchApi, { getUsers, TwitchUser } from 'src/api/twitch';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
 
 const CLIENT_ID = 'ea4ht2mler9y438e2o706g2rsd7jxz';
-const twitchApi = axios.create({
-  baseURL: 'https://api.twitch.tv/helix',
-});
 
 export default defineStore('TwitchAuth', () => {
   const token = useStorage<string | null>('auth.twitch', null, undefined, {
@@ -30,13 +26,10 @@ export default defineStore('TwitchAuth', () => {
 
   async function getCurrentUser() {
     if (token.value) {
-      const response = await twitchApi.get<TwitchResponse<TwitchUser[]>>('/users', {
-        headers: {
-          Authorization: 'Bearer ' + token.value,
-          'Client-ID': CLIENT_ID,
-        },
-      });
-      currentUser.value = response.data.data[0];
+      twitchApi.defaults.headers['Authorization'] = 'Bearer ' + token.value;
+      twitchApi.defaults.headers['Client-ID'] = CLIENT_ID;
+      const response = await getUsers();
+      currentUser.value = response[0];
     }
   }
 

@@ -6,7 +6,7 @@
     </p>
 
     <q-form ref="form">
-      <div class="text-h5 q-mb-sm">Configuration</div>
+      <div class="text-h5 q-my-md">Configuration</div>
       <spotify-signin v-model="config.spotifyAuth" required />
       <slider-field
         v-model="config.player.autohide.delaySeconds"
@@ -23,16 +23,17 @@
         </template>
       </slider-field>
 
-      <div class="h5 q-mb-sm">Twitch Bot</div>
+      <div class="text-h5 q-my-md">Twitch Bot</div>
       <twitch-signin
         hint="Sign in if you want Twitch related functionalities"
         v-model="config.twitchBot.twitchAuth"
         @update:model-value="handleTwitchAuthChange"
       />
-      <q-input
+
+      <twitch-channel-selection
         v-model="config.twitchBot.channelName"
-        label="Twitch Channel to Monitor"
-        :disable="!config.twitchBot.twitchAuth?.token"
+        label="Twitch Channel"
+        hint="Twitch channel to listen for commands in"
       />
       <q-input
         v-model="config.twitchBot.commands.info.text"
@@ -67,7 +68,7 @@
         </template>
       </q-input>
 
-      <h5>Customization</h5>
+      <div class="text-h5 q-my-md">Customization</div>
 
       <div class="q-gutter-sm row">
         <color-picker-input v-model="config.player.background.color" label="Background Color" />
@@ -159,12 +160,12 @@
         />
       </div>
     </q-form>
-    <h5>Preview</h5>
+    <div class="text-h5 q-my-md">Preview</div>
     <resizable-preview :default-width="640" :default-height="240">
       <spotify-widget v-bind="config" preview />
     </resizable-preview>
 
-    <h5>Broadcaster Software Settings</h5>
+    <div class="text-h5 q-my-md">Broadcaster Software Settings</div>
     <generate-copy-widget-link route-name="SpotifyWidget" :config="config" :form="form" />
   </q-page>
 </template>
@@ -184,6 +185,7 @@ import TwitchSignin from 'src/components/TwitchSignin.vue';
 import SpotifySignin from 'src/components/SpotifySignin.vue';
 import ColorPickerInput from 'src/components/ColorPickerInput.vue';
 import SpotifyWidget from './SpotifyWidget.vue';
+import TwitchChannelSelection from 'src/components/TwitchChannelSelection.vue';
 
 const form = ref<QForm>();
 const config = useStorage('spotify.config', {

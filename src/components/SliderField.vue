@@ -1,5 +1,5 @@
 <template>
-  <q-field :label="label" :model-value="modelValue" stack-label class="slider-field">
+  <q-field :label="label" :model-value="modelValue" stack-label class="slider-field" borderless>
     <q-slider
       class="slider"
       :model-value="modelValue"
@@ -11,6 +11,7 @@
     />
     <template v-slot:after>
       <q-input
+        borderless
         class="input"
         type="number"
         :model-value="modelValue"

@@ -1,6 +1,6 @@
 <template>
   <q-page class="q-ma-xl q-gutter-md">
-    <h5>Twitch Timer</h5>
+    <div class="text-h4">Twitch Timer</div>
     <p>
       A timer that counts either up or down on your stream that can be controlled by people in chat.
       You can control it using the following commands:
@@ -38,18 +38,12 @@
     </q-list>
 
     <q-form ref="form">
-      <h5>Configuration</h5>
-      <twitch-signin
-        v-model="config.twitchAuth"
-        @update:model-value="autofillChannel"
-        hint="Optional. If you sign in, the timer will be able to respond to commands in chat."
-      />
-
-      <q-input
+      <div class="text-h5 q-my-md">Configuration</div>
+      <twitch-signin v-model="config.twitchAuth" @update:model-value="autofillChannel" />
+      <twitch-channel-selection
         v-model="config.channelName"
         label="Twitch Channel"
         hint="Twitch Channel to listen for message in"
-        :rules="[(val) => !!val || 'A channel name is required.']"
       />
 
       <q-select
@@ -59,7 +53,7 @@
         :options="['broadcaster', 'moderator', 'vip', 'subscriber']"
       />
 
-      <h5>Customization</h5>
+      <div class="text-h5 q-my-md">Customization</div>
 
       <div class="q-gutter-sm row items-start">
         <color-picker-input v-model="config.colors.time" label="Time Color" />
@@ -68,16 +62,11 @@
         <color-picker-input v-model="config.colors.shadow" label="Time Shadow" />
         <color-picker-input v-model="config.colors.text" label="Text Color" />
         <color-picker-input v-model="config.colors.textShadow" label="Text Shadow" />
+        <q-field label="Text Alignment" v-model="config.textAlign" stack-label borderless>
+          <q-radio v-model="config.textAlign" label="Left" val="left" />
+          <q-radio v-model="config.textAlign" label="Right" val="right" />
+        </q-field>
       </div>
-      <q-field label="Text Alignment" v-model="config.textAlign" stack-label>
-        <q-btn-toggle
-          v-model="config.textAlign"
-          :options="[
-            { label: 'Left', value: 'left' },
-            { label: 'Right', value: 'right' },
-          ]"
-        />
-      </q-field>
       <slider-field
         label="Flashing Animation Speed"
         unit="ms"
@@ -103,12 +92,12 @@
 
       <!-- animationSpeed: 500, -->
     </q-form>
-    <h5>Preview</h5>
-    <resizable-preview :default-width="820" :default-height="590">
+    <div class="text-h5 q-my-md">Preview</div>
+    <resizable-preview v-if="config.channelName" :default-width="820" :default-height="590">
       <timer-widget v-bind="config" preview />
     </resizable-preview>
 
-    <h5>Broadcaster Software Settings</h5>
+    <div class="text-h5 q-my-md">Broadcaster Software Settings</div>
     <generate-copy-widget-link route-name="TimerWidget" :config="config" :form="form" />
   </q-page>
 </template>
@@ -127,6 +116,7 @@ import TimerWidget from './TimerWidget.vue';
 import SliderField from 'src/components/SliderField.vue';
 import { useStorage } from '@vueuse/core';
 import GenerateCopyWidgetLink from 'src/components/GenerateCopyWidgetLink.vue';
+import TwitchChannelSelection from 'src/components/TwitchChannelSelection.vue';
 
 const form = ref({} as QForm);
 
