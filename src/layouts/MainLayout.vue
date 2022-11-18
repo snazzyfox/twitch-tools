@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHr LpR lfr">
+  <q-layout view="hHh LpR fFf">
     <q-header reveal bordered class="bg-primary text-white" height-hint="90">
       <q-toolbar>
         <q-toolbar-title> <q-icon :name="mdiSword" /> Snazzy's Twitch Tools </q-toolbar-title>
@@ -16,6 +16,7 @@
         <q-route-tab to="/timer" label="Timer Overlay" />
         <q-route-tab to="/dvd-bounce" label="DVD Bounce" />
         <q-route-tab to="/spotify" label="Spotify Overlay" />
+        <q-route-tab to="/copy-pasta" label="Copy Pasta Saver" />
       </q-tabs>
     </q-header>
 

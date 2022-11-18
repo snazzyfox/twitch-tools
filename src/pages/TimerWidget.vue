@@ -97,7 +97,7 @@ function reply(user: string, message: string) {
 
 ComfyJs.onCommand = (user, command, message, flags) => {
   if (!hasPermissions(flags)) {
-    reply(user, "You can't do that.");
+    reply(user, "You don't have permissions to do that.");
     return;
   }
   const now = Date.now();
@@ -155,11 +155,18 @@ function formatTime(milliseconds: number) {
 }
 
 function addTimer(duration: string, title: string) {
-  let newTimer: TimerData;
+  const existingIndex = timerData.value.findIndex((t) => t.title === title);
   if (duration === 'up') {
-    newTimer = { time: Date.now(), direction: 'up', title };
+    const newTimer: TimerData = { time: Date.now(), direction: 'up', title };
+    if (existingIndex > -1) {
+      timerData.value[existingIndex] = newTimer;
+    } else {
+      timerData.value.push(newTimer);
+    }
   } else {
-    const match = duration.match(/^(?:(?<d>\d+)d)?(?:(?<h>\d+)h)?(?:(?<m>\d+)m)?(?:(?<s>\d+)s)?$/i);
+    const match = duration.match(
+      /^(?<sign>\+|-)?(?:(?<d>\d+)d)?(?:(?<h>\d+)h)?(?:(?<m>\d+)m)?(?:(?<s>\d+)s)?$/i
+    );
     if (match && match.groups) {
       const millis =
         Number(match.groups.d || 0) * 86_400_000 + // days
@@ -167,17 +174,20 @@ function addTimer(duration: string, title: string) {
         Number(match.groups.m || 0) * 60_000 + // minutes
         Number(match.groups.s || 0) * 1_000; // seconds
       // extra half second buffer
-      newTimer = { time: Date.now() + millis + 500, direction: 'down', title };
+      if (existingIndex > -1) {
+        if (match.groups.sign === '+') {
+          timerData.value[existingIndex].time += millis;
+        } else if (match.groups.sign === '-') {
+          timerData.value[existingIndex].time -= millis;
+        } else {
+          timerData.value[existingIndex].time = Date.now() + millis + 500;
+        }
+      } else {
+        timerData.value.push({ time: Date.now() + millis + 500, direction: 'down', title });
+      }
     } else {
       return 'The duration you provided is not valid.';
     }
-  }
-  const existingIndex = timerData.value.findIndex((t) => t.title === title);
-  if (existingIndex > -1) {
-    timerData.value[existingIndex] = newTimer;
-    return 'A timer with that name already exists. I have replaced it.';
-  } else {
-    timerData.value.push(newTimer);
   }
 }
 
