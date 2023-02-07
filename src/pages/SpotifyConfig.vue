@@ -18,7 +18,7 @@
         hint="Automatically hide the overlay after it's on screen for some time. The overlay will become visible again as soon as a new song starts playing."
         :disable="!config.twitchBot.twitchAuth || !config.player.autohide.enabled"
       >
-        <template v-slot:before>
+        <template #before>
           <q-toggle v-model="config.player.autohide.enabled" />
         </template>
       </slider-field>
@@ -42,7 +42,7 @@
         :disable="!config.twitchBot.twitchAuth?.token || !config.twitchBot.commands.info.enabled"
         prefix="!"
       >
-        <template v-slot:before>
+        <template #before>
           <q-toggle
             v-model="config.twitchBot.commands.info.enabled"
             :disable="!config.twitchBot.twitchAuth?.token"
@@ -60,7 +60,7 @@
         "
         prefix="!"
       >
-        <template v-slot:before>
+        <template #before>
           <q-toggle
             v-model="config.twitchBot.commands.show.enabled"
             :disable="!config.twitchBot.twitchAuth?.token || !config.player.autohide.enabled"

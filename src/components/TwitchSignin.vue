@@ -1,6 +1,6 @@
 <template>
   <q-field :label="$props.label" stack-label :hint="$props.hint">
-    <template v-slot:default>
+    <template #default>
       <user-label
         dense
         v-if="store.isSignedIn"
@@ -9,7 +9,7 @@
       />
       <span class="text-warning" v-else>Not Signed In</span>
     </template>
-    <template v-slot:prepend>
+    <template #prepend>
       <q-btn
         v-if="store.isSignedIn"
         label="Sign Out"

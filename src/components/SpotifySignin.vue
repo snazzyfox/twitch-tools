@@ -6,7 +6,7 @@
     :model-value="modelValue"
     :rules="[(val) => !required || !!(val && val.token) || 'You must sign in to Spotify.']"
   >
-    <template v-slot:default>
+    <template #default>
       <a
         v-if="store.isSignedIn"
         :href="store.currentUser?.external_urls.spotify"
@@ -22,7 +22,7 @@
       </a>
       <span class="text-warning" v-else>Not Signed In</span>
     </template>
-    <template v-slot:prepend>
+    <template #prepend>
       <q-btn
         v-if="store.isSignedIn"
         label="Sign Out"

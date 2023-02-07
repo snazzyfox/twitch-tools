@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { StorageSerializers, useStorage } from '@vueuse/core';
 import twitchApi, { getUsers, TwitchUser } from 'src/api/twitch';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const CLIENT_ID = 'ea4ht2mler9y438e2o706g2rsd7jxz';
@@ -17,12 +17,8 @@ export default defineStore('TwitchAuth', () => {
   const REDIRECT_URI =
     location.origin + location.pathname + router.resolve({ name: 'TwitchOauth' }).href;
 
-  onMounted(async () => {
-    await getCurrentUser();
-  });
-
   // this needs to be a watch because token is set in a separate window
-  watch(token, getCurrentUser);
+  watch(token, getCurrentUser, { immediate: true });
 
   async function getCurrentUser() {
     if (token.value) {

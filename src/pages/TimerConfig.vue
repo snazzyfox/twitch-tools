@@ -10,9 +10,17 @@
         <q-item-section>
           <q-item-label><code>!timer {time} {title}</code></q-item-label>
           <q-item-label caption>
-            Start a new countdown timer. Time should be in the format <code>1d2h3m4s</code>. Title
-            is optional, and will be displayed under the timer. For example,
-            <code>!timer 5m30s Gamba</code>
+            <p>
+              Set a countdown timer. Time should be in the format <code>1d2h3m4s</code>. Title is
+              optional, and will be displayed under the timer. For example,
+              <code>!timer 5m30s Gamba</code>
+            </p>
+
+            <p>
+              If a timer with the given title already exists, it will be updated. You can also place
+              a plus (&plus;) or minus (&minus;) before the time to add or subtract time to the
+              existing timer instead of overwriting it with a new time.
+            </p>
           </q-item-label>
         </q-item-section>
       </q-item>

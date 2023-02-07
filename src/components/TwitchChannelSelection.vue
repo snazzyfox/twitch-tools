@@ -2,22 +2,20 @@
   <q-select
     label="Twitch Channel"
     use-input
-    :disable="!store.isSignedIn"
-    :options="Object.values(knownChannelsData)"
-    :model-value="modelValue"
     option-value="id"
-    @update:model-value="$emit('update:modelValue', $event.login)"
+    :input-debounce="200"
+    :disable="!store.isSignedIn"
+    :options="filteredChannelsData"
+    :model-value="modelValue"
+    @update:model-value="$emit('update:modelValue', $event?.login)"
     @filter="handleFilter"
     @new-value="handleNewChannel"
-    :rules="[
-      (val) => !!val || 'You must select a channel.',
-      (val) => /\w+/.test(val) || 'That does not look like a valid channel name.',
-    ]"
+    :rules="[(val) => !!val || 'You must select a channel.']"
   >
-    <template v-slot:selected>
+    <template #selected>
       <user-label v-if="user" :name="user.display_name" :image-src="user.profile_image_url" dense />
     </template>
-    <template v-slot:option="{ itemProps, opt }">
+    <template #option="{ itemProps, opt }">
       <user-label
         :name="opt.display_name"
         :image-src="opt.profile_image_url"
@@ -42,12 +40,13 @@ import { useStorage } from '@vueuse/core';
 import { useQuasar } from 'quasar';
 import TwitchAuth from 'src/stores/TwitchAuth';
 import { getUsers, TwitchUser } from 'src/api/twitch';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import UserLabel from './UserLabel.vue';
 import { ionCloseOutline } from '@quasar/extras/ionicons-v6';
 
 const props = defineProps<{
   modelValue?: string;
+  mustBeMod?: boolean;
 }>();
 const emit = defineEmits(['update:modelValue']);
 
@@ -67,12 +66,15 @@ watch(user, async (newValue?: TwitchUser) => {
   }
 });
 
-onMounted(async () => {
-  // load existing channel data
-  if (store.isSignedIn && knownChannels.value.size) {
-    knownChannelsData.value = await getUsers({ id: [...knownChannels.value] });
-  }
-});
+watch(
+  () => store.isSignedIn,
+  async (isSignedIn: boolean) => {
+    if (isSignedIn && knownChannels.value.size) {
+      knownChannelsData.value = await getUsers({ id: [...knownChannels.value] });
+    }
+  },
+  { immediate: true }
+);
 
 function addUser(user: TwitchUser) {
   // new user found. Add it to known channels
@@ -86,33 +88,33 @@ function addUser(user: TwitchUser) {
 }
 
 async function handleNewChannel(inputValue: string, callback: (item?: TwitchUser) => void) {
-  if (!/\w+/.test(inputValue)) {
+  if (!/^\w+$/.test(inputValue)) {
     callback();
     quasar.notify({
       message: 'That does not appear to be a valid Twitch username.',
-      color: 'error',
+      type: 'negative',
     });
-  } else {
-    const response = await getUsers({ login: [inputValue] });
-    if (response.length) {
-      addUser(response[0]);
-      callback(response[0]);
-    } else {
-      callback();
-      quasar.notify({
-        message: 'There is no user with that username.',
-        color: 'error',
-      });
-    }
+    return;
   }
+  const response = await getUsers({ login: [inputValue] });
+  if (!response.length) {
+    callback();
+    quasar.notify({
+      message: 'There is no user with that username.',
+      type: 'negative',
+    });
+    return;
+  }
+  addUser(response[0]);
+  callback(response[0]);
 }
 
 function handleFilter(inputValue: string, done: (callback: () => void) => void) {
   done(() => {
     if (!inputValue) {
-      filteredChannelsData.value = Object.values(knownChannelsData.value);
+      filteredChannelsData.value = knownChannelsData.value;
     } else {
-      filteredChannelsData.value = Object.values(knownChannelsData.value).filter((c) =>
+      filteredChannelsData.value = knownChannelsData.value.filter((c) =>
         c.login.toLowerCase().includes(inputValue.toLowerCase())
       );
     }

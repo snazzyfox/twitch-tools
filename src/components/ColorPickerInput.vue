@@ -7,7 +7,7 @@
     :model-value="modelValue"
     @update:model-value="(value) => $emit('update:modelValue', value)"
   >
-    <template v-slot:prepend>
+    <template #prepend>
       <q-icon :name="mdiSquare" :style="{ color: modelValue }" />
     </template>
     <q-popup-proxy>

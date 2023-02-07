@@ -9,7 +9,7 @@
       :step="step"
       :disable="disable"
     />
-    <template v-slot:after>
+    <template #after>
       <q-input
         borderless
         class="input"
@@ -20,9 +20,9 @@
         :disable="disable"
       />
     </template>
-    <template v-slot:prepend><slot name="prepend" /></template>
-    <template v-slot:before><slot name="before" /></template>
-    <template v-slot:append><slot name="append" /></template>
+    <template #prepend><slot name="prepend" /></template>
+    <template #before><slot name="before" /></template>
+    <template #append><slot name="append" /></template>
   </q-field>
 </template>
 
