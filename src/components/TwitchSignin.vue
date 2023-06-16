@@ -48,11 +48,11 @@ withDefaults(
 const emit = defineEmits(['update:modelValue']);
 
 const store = twitchAuthStore();
-const { token } = storeToRefs(store);
+const { token, currentUser, isSignedIn } = storeToRefs(store);
 
 watch(
-  token,
-  (newToken) => emit('update:modelValue', { token: newToken, username: store.currentUser?.login }),
+  isSignedIn,
+  () => emit('update:modelValue', { token: token.value, username: currentUser.value?.login }),
   { immediate: true }
 );
 

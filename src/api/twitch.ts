@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import twitchAuthStore from 'src/stores/TwitchAuth';
 
 export interface TwitchResponse<T> {
   data: T;
@@ -61,4 +62,10 @@ export async function getFollows(params: { from_id?: string; to_id?: string }) {
     params,
   });
   return await getPaginatedData(response);
+}
+
+export async function sendAnnouncement(broadcaster_id: string, message: string, color?: string) {
+  const store = twitchAuthStore();
+  const params = { broadcaster_id, moderator_id: store.currentUser?.id };
+  await twitchApi.post('/chat/announcements', { message, color }, { params });
 }

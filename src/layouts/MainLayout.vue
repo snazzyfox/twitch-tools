@@ -16,6 +16,7 @@
         <q-route-tab to="/timer" label="Timer Overlay" />
         <q-route-tab to="/dvd-bounce" label="DVD Bounce" />
         <q-route-tab to="/spotify" label="Spotify Overlay" />
+        <q-route-tab to="/chat-timer" label="Chat Timer" />
       </q-tabs>
     </q-header>
 

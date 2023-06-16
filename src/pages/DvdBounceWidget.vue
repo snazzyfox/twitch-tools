@@ -22,7 +22,7 @@ let dx = Math.random() > 0.5 ? 1 : -1,
 
 const props = defineProps<DvdBounceWidgetConfig>();
 const savedImageUrl = useStorage('dvdBounceWidget.imageUrl', '');
-const imageDataUrl = useStorage('dvdBounceWidget.image', '');
+const savedImageDataUrl = useStorage('dvdBounceWidget.image', '');
 let container: HTMLDivElement;
 let img: HTMLImageElement;
 let position = { left: 0, top: 0 };
@@ -32,7 +32,7 @@ onMounted(async () => {
     // image transfer urls are single-use. Don't waste it on the preview
     watch(
       () => props.imageDataUrl,
-      (value) => (imageDataUrl.value = value)
+      (value) => (savedImageDataUrl.value = value)
     );
   } else if (savedImageUrl.value !== props.imageUrl) {
     // Check if imageUrl has changed since image was last downloaded.
@@ -40,7 +40,7 @@ onMounted(async () => {
     const response = await fetch(props.imageUrl);
     const blob = await response.blob();
     const reader = new FileReader();
-    reader.onload = () => (imageDataUrl.value = reader.result!.toString());
+    reader.onload = () => (savedImageDataUrl.value = reader.result!.toString());
     reader.readAsDataURL(blob);
     savedImageUrl.value = props.imageUrl;
   }

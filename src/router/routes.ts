@@ -26,6 +26,11 @@ const routes: RouteRecordRaw[] = [
         path: '/spotify',
         component: () => import('pages/SpotifyConfig.vue'),
       },
+      {
+        name: 'ChatTimer',
+        path: '/chat-timer',
+        component: () => import('pages/ChatTimer.vue'),
+      },
     ],
   },
   {

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { StorageSerializers, useStorage } from '@vueuse/core';
 import twitchApi, { getUsers, TwitchUser } from 'src/api/twitch';
-import { computed, ref, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const CLIENT_ID = 'ea4ht2mler9y438e2o706g2rsd7jxz';
@@ -11,8 +11,10 @@ export default defineStore('TwitchAuth', () => {
     serializer: StorageSerializers.object,
   });
   const signinState = useStorage<string | null>('auth.twitch.state', null);
-  const currentUser = ref<TwitchUser | null>(null);
-  const isSignedIn = computed(() => token.value !== null);
+  const currentUser = useStorage<TwitchUser | null>('auth.twitch.user', null, undefined, {
+    serializer: StorageSerializers.object,
+  });
+  const isSignedIn = computed(() => token.value !== null && currentUser.value !== null);
   const router = useRouter();
   const REDIRECT_URI =
     location.origin + location.pathname + router.resolve({ name: 'TwitchOauth' }).href;
@@ -36,7 +38,7 @@ export default defineStore('TwitchAuth', () => {
       client_id: CLIENT_ID,
       response_type: 'token',
       redirect_uri: REDIRECT_URI,
-      scope: 'chat:read chat:edit',
+      scope: 'chat:read chat:edit moderator:manage:announcements',
       state: signinState.value,
     });
     return base + params.toString();

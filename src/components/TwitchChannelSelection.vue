@@ -7,7 +7,7 @@
     :disable="!store.isSignedIn"
     :options="filteredChannelsData"
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event?.login)"
+    @update:model-value="handleSelectUser"
     @filter="handleFilter"
     @new-value="handleNewChannel"
     :rules="[(val) => !!val || 'You must select a channel.']"
@@ -46,9 +46,8 @@ import { ionCloseOutline } from '@quasar/extras/ionicons-v6';
 
 const props = defineProps<{
   modelValue?: string;
-  mustBeMod?: boolean;
 }>();
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'update:userId']);
 
 const store = TwitchAuth();
 const quasar = useQuasar();
@@ -121,10 +120,16 @@ function handleFilter(inputValue: string, done: (callback: () => void) => void) 
   });
 }
 
+async function handleSelectUser(event: TwitchUser | null) {
+  emit('update:modelValue', event?.login);
+  emit('update:userId', event?.id);
+}
+
 async function handleRemoveUser(userId: string) {
   // clear current selection if they're current user
   if (props.modelValue === userId) {
     emit('update:modelValue', null);
+    emit('update:userId', null);
   }
   knownChannelsData.value = knownChannelsData.value.filter((u) => u.id != userId);
   knownChannels.value.delete(userId);
