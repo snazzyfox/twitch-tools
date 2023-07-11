@@ -217,7 +217,8 @@ function removeTimer(title: string) {
 
 <style scoped lang="sass">
 .timer-wrapper
-  margin: 0.1em
+  overflow: hidden
+  padding: 0.1em
 
 .timer-container
   margin-bottom: 1.5em
