@@ -75,6 +75,31 @@
           <q-radio v-model="config.textAlign" label="Right" val="right" />
         </q-field>
       </div>
+      <div class="q-gutter-sm row">
+        <font-picker
+          class="col-4"
+          v-model="config.font.time"
+          label="Timer Font"
+          preview-text="1:23:45"
+        />
+        <slider-field
+          label="Timer Font Size"
+          unit="px"
+          v-model="config.size.time"
+          :min="8"
+          :max="300"
+        />
+      </div>
+      <div class="q-gutter-sm row">
+        <font-picker class="col-4" v-model="config.font.title" label="Title Font" />
+        <slider-field
+          label="Title Font Size"
+          unit="px"
+          v-model="config.size.title"
+          :min="8"
+          :max="120"
+        />
+      </div>
       <slider-field
         label="Flashing Animation Speed"
         unit="ms"
@@ -82,20 +107,6 @@
         :min="200"
         :max="4000"
         :step="100"
-      />
-      <slider-field
-        label="Timer Font Size"
-        unit="px"
-        v-model="config.size.time"
-        :min="8"
-        :max="300"
-      />
-      <slider-field
-        label="Title Font Size"
-        unit="px"
-        v-model="config.size.title"
-        :min="8"
-        :max="120"
       />
 
       <!-- animationSpeed: 500, -->
@@ -119,6 +130,7 @@ import TwitchSignin from 'src/components/TwitchSignin.vue';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { TimerWidgetOptions } from './widgets/TimerWidget.vue';
+import FontPicker from 'src/components/FontPicker.vue';
 import ResizablePreview from 'src/components/ResizablePreview.vue';
 import TimerWidget from './TimerWidget.vue';
 import SliderField from 'src/components/SliderField.vue';
@@ -128,24 +140,35 @@ import TwitchChannelSelection from 'src/components/TwitchChannelSelection.vue';
 
 const form = ref({} as QForm);
 
-const config = useStorage('timer.config', {
-  channelName: '',
-  colors: {
-    time: '#ffbb00ff',
-    done: '#ff6644ff',
-    border: '#00000099',
-    shadow: '#00000099',
-    text: '#ffbb00ff',
-    textShadow: '#000000aa',
-  },
-  size: {
-    time: 180,
-    title: 48,
-  },
-  minRole: 'moderator',
-  textAlign: 'right',
-  animationSpeed: 1000,
-} as TimerWidgetOptions);
+const config = useStorage(
+  'timer.config',
+  {
+    channelName: '',
+    colors: {
+      time: '#ffbb00ff',
+      done: '#ff6644ff',
+      border: '#00000099',
+      shadow: '#00000099',
+      text: '#ffbb00ff',
+      textShadow: '#000000aa',
+    },
+    font: {
+      time: 'Digital-7 Mono',
+      title: 'Bebas Neue',
+    },
+    size: {
+      time: 180,
+      title: 48,
+    },
+    minRole: 'moderator',
+    textAlign: 'right',
+    animationSpeed: 1000,
+  } as TimerWidgetOptions,
+  undefined,
+  {
+    mergeDefaults: true,
+  }
+);
 
 function autofillChannel(auth: { username: string }) {
   if (auth && !config.value.channelName) {

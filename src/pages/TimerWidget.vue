@@ -1,15 +1,18 @@
 <template>
-  <transition-group>
-    <div v-for="timer in state" :key="timer.title" class="timer-container">
-      <div class="time" :class="{ done: timer.done }">{{ timer.time }}</div>
-      <div class="title">{{ timer.title }}</div>
-    </div>
-  </transition-group>
+  <div class="timer-wrapper">
+    <transition-group>
+      <div v-for="timer in state" :key="timer.title" class="timer-container">
+        <div class="time" :class="{ done: timer.done }">{{ timer.time }}</div>
+        <div class="title">{{ timer.title }}</div>
+      </div>
+    </transition-group>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useStorage } from '@vueuse/core';
 import { onMounted, onUnmounted, ref } from 'vue';
+import { useFont } from 'src/components/FontPickerUtils';
 import ComfyJs, { OnMessageFlags } from 'comfy.js';
 import ComfyJS from 'comfy.js';
 
@@ -24,6 +27,10 @@ export interface TimerWidgetOptions {
     shadow: string;
     text: string;
     textShadow: string;
+  };
+  font?: {
+    time: string;
+    title: string;
   };
   size: {
     time: number;
@@ -75,6 +82,9 @@ onUnmounted(() => {
   clearInterval(interval);
   if (connected) ComfyJs.Disconnect();
 });
+
+useFont(props.font?.time || 'Digital-7 Mono');
+useFont(props.font?.title || 'Bebas Neue');
 
 function hasPermissions(userFlags: OnMessageFlags) {
   switch (props.minRole) {
@@ -206,11 +216,11 @@ function removeTimer(title: string) {
 </script>
 
 <style scoped lang="sass">
-@import url('https://fonts.cdnfonts.com/css/digital-7-mono')
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap')
+.timer-wrapper
+  margin: 0.1em
 
 .timer-container
-  margin-bottom: 12px
+  margin-bottom: 1.5em
   text-align: v-bind("$props.textAlign")
   width: 100%
 
@@ -218,9 +228,10 @@ function removeTimer(title: string) {
   color: v-bind("$props.colors.time")
   -webkit-text-stroke: 1px v-bind("$props.colors.border")
   text-shadow: 4px 4px v-bind("$props.colors.shadow")
-  font-family: "Digital-7 Mono", "Courier New", monospace
+  font-family: v-bind("$props.font?.time || 'Digital-7 Mono'"), "Courier New", monospace
   font-size: v-bind("$props.size.time + 'px'")
-  line-height: v-bind("$props.size.time * 0.8 + 'px'")
+  line-height: 1em
+  margin-bottom: -0.1em
 
   &.done
     @keyframes flash
@@ -233,9 +244,10 @@ function removeTimer(title: string) {
 .title
   color: v-bind("$props.colors.text")
   text-shadow: 3px 3px v-bind("$props.colors.textShadow")
-  font-family: 'Bebas Neue', sans-serif
+  font-family: v-bind("$props.font?.title || 'Bebas Neue'"), sans-serif
   font-size: v-bind("$props.size.title + 'px'")
-  line-height: v-bind("$props.size.title * 0.9 + 'px'")
+  line-height: 1.0em
+  font-weight: 600
   width: 100%
 
 .v-enter-active, .v-leave-active
