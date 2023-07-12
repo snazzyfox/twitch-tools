@@ -106,25 +106,24 @@ function reply(user: string, message: string) {
 }
 
 ComfyJs.onCommand = (user, command, message, flags) => {
-  if (!hasPermissions(flags)) {
-    reply(user, "You don't have permissions to do that.");
-    return;
+  if (command == 'timer') {
+    if (!hasPermissions(flags)) {
+      reply(user, "You don't have permissions to do that.");
+      return;
+    }
+    const now = Date.now();
+    if (cooldownUntil > now) return;
+    const [firstToken, ...restTokens] = message.split(/\s+/);
+    const title = restTokens.length ? restTokens.join(' ') : '';
+    let error;
+    if (firstToken === 'off') {
+      error = removeTimer(title);
+    } else {
+      error = addTimer(firstToken, title);
+    }
+    if (error) reply(user, error);
+    cooldownUntil = now + COMMAND_COOLDOWN_MS;
   }
-  const now = Date.now();
-  if (cooldownUntil > now) return;
-  switch (command) {
-    case 'timer':
-      const [firstToken, ...restTokens] = message.split(/\s+/);
-      const title = restTokens.length ? restTokens.join(' ') : '';
-      let error;
-      if (firstToken === 'off') {
-        error = removeTimer(title);
-      } else {
-        error = addTimer(firstToken, title);
-      }
-      if (error) reply(user, error);
-  }
-  cooldownUntil = now + COMMAND_COOLDOWN_MS;
 };
 
 ComfyJS.onConnected = () => (connected = true);
