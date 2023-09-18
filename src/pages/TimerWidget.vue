@@ -165,8 +165,14 @@ function formatTime(milliseconds: number) {
   }
 }
 
+function getTimerIndex(title: string) {
+  return timerData.value.findIndex(
+    (timer) => timer.title.trim().toLowerCase() === title.trim().toLowerCase()
+  );
+}
+
 function addTimer(duration: string, title: string) {
-  const existingIndex = timerData.value.findIndex((t) => t.title === title);
+  const existingIndex = getTimerIndex(title);
   if (duration === 'up') {
     const newTimer: TimerData = { time: Date.now(), direction: 'up', title };
     if (existingIndex > -1) {
@@ -204,7 +210,7 @@ function addTimer(duration: string, title: string) {
 
 function removeTimer(title: string) {
   // See if a timer with the given title can be found
-  let index = timerData.value.findIndex((timer) => timer.title === title);
+  let index = getTimerIndex(title);
   if (index === -1) {
     index = parseInt(title[0]) - 1;
   }

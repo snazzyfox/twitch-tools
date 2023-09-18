@@ -17,9 +17,10 @@
             </p>
 
             <p>
-              If a timer with the given title already exists, it will be updated. You can also place
-              a plus (&plus;) or minus (&minus;) before the time to add or subtract time to the
-              existing timer instead of overwriting it with a new time.
+              If a timer with the given title already exists, it will be updated. The title of
+              timers are matched case insensitively. You can also place a plus (&plus;) or minus
+              (&minus;) before the time to add or subtract time to the existing timer instead of
+              overwriting it with a new time.
             </p>
           </q-item-label>
         </q-item-section>
