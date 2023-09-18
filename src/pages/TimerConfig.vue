@@ -83,21 +83,41 @@
           preview-text="1:23:45"
         />
         <slider-field
+          class="col-3"
           label="Timer Font Size"
           unit="px"
           v-model="config.size.time"
           :min="8"
           :max="300"
         />
+        <slider-field
+          class="col-3"
+          label="Timer Line Height"
+          unit="em"
+          v-model="config.size.timeLineHeight"
+          :min="0.1"
+          :max="3.0"
+          :step="0.05"
+        />
       </div>
       <div class="q-gutter-sm row">
         <font-picker class="col-4" v-model="config.font.title" label="Title Font" />
         <slider-field
+          class="col-3"
           label="Title Font Size"
           unit="px"
           v-model="config.size.title"
           :min="8"
           :max="120"
+        />
+        <slider-field
+          class="col-3"
+          label="Title Line Height"
+          unit="em"
+          v-model="config.size.titleLineHeight"
+          :min="0.1"
+          :max="3.0"
+          :step="0.05"
         />
       </div>
       <slider-field
@@ -108,8 +128,6 @@
         :max="4000"
         :step="100"
       />
-
-      <!-- animationSpeed: 500, -->
     </q-form>
     <div class="text-h5 q-my-md">Preview</div>
     <resizable-preview v-if="config.channelName" :default-width="820" :default-height="590">
@@ -158,7 +176,9 @@ const config = useStorage(
     },
     size: {
       time: 180,
+      timeLineHeight: 1,
       title: 48,
+      titleLineHeight: 1,
     },
     minRole: 'moderator',
     textAlign: 'right',

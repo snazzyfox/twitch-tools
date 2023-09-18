@@ -34,7 +34,9 @@ export interface TimerWidgetOptions {
   };
   size: {
     time: number;
+    timeLineHeight?: number;
     title: number;
+    titleLineHeight?: number;
   };
   animationSpeed: number;
   textAlign: 'left' | 'right';
@@ -220,7 +222,7 @@ function removeTimer(title: string) {
   padding: 0.1em
 
 .timer-container
-  margin-bottom: 1.5em
+  margin-bottom: .25em
   text-align: v-bind("$props.textAlign")
   width: 100%
 
@@ -230,7 +232,7 @@ function removeTimer(title: string) {
   text-shadow: 4px 4px v-bind("$props.colors.shadow")
   font-family: v-bind("$props.font?.time || 'Digital-7 Mono'"), "Courier New", monospace
   font-size: v-bind("$props.size.time + 'px'")
-  line-height: 1em
+  line-height: v-bind("($props.size?.timeLineHeight || 1) + 'em'")
   margin-bottom: -0.1em
 
   &.done
@@ -246,7 +248,7 @@ function removeTimer(title: string) {
   text-shadow: 3px 3px v-bind("$props.colors.textShadow")
   font-family: v-bind("$props.font?.title || 'Bebas Neue'"), sans-serif
   font-size: v-bind("$props.size.title + 'px'")
-  line-height: 1.0em
+  line-height: v-bind("($props.size?.titleLineHeight || 1) + 'em'")
   font-weight: 600
   width: 100%
 
