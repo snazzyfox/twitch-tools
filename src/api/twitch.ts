@@ -90,7 +90,10 @@ export function setTwitchAuth(clientId: string, bearerToken: string) {
 }
 
 /** For twitch endpoints that returns paginated data, a wrapper function that repeats the request while fetching more data until exhausted. */
-async function getPaginatedData<T>(initialResponse: KyResponse): Promise<T[]> {
+async function getPaginatedData<T>(
+  initialResponse: KyResponse,
+  callback?: (data: T[]) => void
+): Promise<T[]> {
   const responseJson = await initialResponse.json<TwitchResponse<T[]>>();
   const result = responseJson.data;
   const url = new URL(initialResponse.url);
@@ -102,6 +105,9 @@ async function getPaginatedData<T>(initialResponse: KyResponse): Promise<T[]> {
     >();
     result.push(...response.data);
     cursor = response.pagination?.cursor;
+    if (callback) {
+      callback([...result]);
+    }
   }
   return result;
 }
@@ -119,10 +125,13 @@ export async function getFollows(params: { from_id?: string; to_id?: string }) {
   return await getPaginatedData<TwitchUser>(response);
 }
 
-export async function getClips(params: ClipID & { started_at?: string; ended_at?: string }) {
+export async function getClips(
+  params: ClipID & { started_at?: string; ended_at?: string },
+  paginationCallback?: (data: TwitchClip[]) => void
+) {
   const searchParams = flattenParams({ ...params, first: 100 });
   const response = await twitchApi.get('clips', { searchParams });
-  return await getPaginatedData<TwitchClip>(response);
+  return await getPaginatedData<TwitchClip>(response, paginationCallback);
 }
 
 export async function getGames(params: { id?: string[]; name?: string[] }) {

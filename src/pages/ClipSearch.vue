@@ -25,8 +25,10 @@
             hint="YYYY-MM-DD format, UTC timezone." mask="####-##-##" clearable />
           <q-input class="col-4" v-model="options.dateRange.to" label="Clip created before"
             hint="YYYY-MM-DD format, UTC timezone." mask="####-##-##" clearable />
-          <q-btn class="q-my-lg" color="primary" :icon="ionDownloadOutline" :loading="loading"
-            @click="getClipsData">Download Clip Data</q-btn>
+          <q-btn class="q-my-lg" color="primary" :icon="ionDownloadOutline" :loading="loading" @click="getClipsData">
+            Download Clip Data
+            <template #loading><q-spinner-tail class="on-left" /> {{ loadingAmount }} clips loaded</template>
+          </q-btn>
         </q-form>
 
         <q-form class="q-gutter-sm q-mb-sm" v-if="clipData.length">
@@ -77,7 +79,7 @@
       </div>
 
       <q-pagination class="flex flex-center" v-model="currentPage" :max="Math.ceil(filteredClipData.length / PAGE_SIZE)"
-        boundary-numbers direction-links />
+        boundary-numbers direction-links max-pages="10" />
     </div>
   </q-page>
 </template>
@@ -109,6 +111,7 @@ const options = useStorage('clipsearch.config', {
 } as ClipSearchOptions);
 const clipData = ref<TwitchClip[]>([]);
 const loading = ref(false);
+const loadingAmount = ref(0);
 const clipSearch = ref({
   author: {
     search: '',
@@ -126,15 +129,16 @@ const games = ref<{ [key: string]: TwitchGame }>({});
 async function getClipsData() {
   try {
     loading.value = true;
+    loadingAmount.value = 0;
     clipData.value = [];
     const dates = {
       started_at: options.value.dateRange.from && new Date(options.value.dateRange.from).toISOString(),
       ended_at: options.value.dateRange.to && new Date(options.value.dateRange.to).toISOString(),
     }
     if (options.value.channelId) {
-      clipData.value = await getClips({ broadcaster_id: options.value.channelId, ...dates })
+      clipData.value = await getClips({ broadcaster_id: options.value.channelId, ...dates }, (data) => loadingAmount.value = data.length)
     } else if (options.value.gameId) {
-      clipData.value = await getClips({ game_id: options.value.gameId, ...dates })
+      clipData.value = await getClips({ game_id: options.value.gameId, ...dates }, (data) => loadingAmount.value = data.length)
     } else {
       quasar.notify({
         message: 'You must provide at least a channel name or a game name to search. I cannot pull the list of all clips across all of twitch.',
