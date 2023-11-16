@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-drawer side="left" bordered :model-value="true" :width="450" :breakpoint="500">
+    <q-drawer side="left" bordered :model-value="true" :width="450">
       <q-scroll-area class="fit q-pa-lg">
         <div class="text-h4">Twitch Clip Search</div>
         <p>
@@ -33,30 +33,36 @@
 
         <q-form class="q-gutter-sm q-mb-sm" v-if="clipData.length">
           <div class="text-h5 q-my-md">Additional Filters</div>
-          <q-input v-model="clipSearch.author.search" label="Clip Author Name" />
-          <q-btn-toggle v-model="clipSearch.author.match" :options="[
-            { label: 'includes', value: 'include' },
-            { 'label': 'starts with', value: 'prefix' },
-            { label: 'is exactly', value: 'exact' }
-          ]" />
+          <q-input v-model="clipSearch.author.search" label="Clip Author Name">
+            <template #after>
+              <q-select dense outlined v-model="clipSearch.author.match" emit-value map-options :options="[
+                { label: 'Includes', value: 'include' },
+                { label: 'Starts with', value: 'prefix' },
+                { label: 'Exact Match', value: 'exact' }
+              ]" />
+            </template>
+          </q-input>
 
-          <q-input v-model="clipSearch.title.search" label="Clip Title" />
-          <q-btn-toggle v-model="clipSearch.title.match" :options="[
-            { label: 'any word', value: 'any' },
-            { label: 'all words', value: 'all' },
-            { label: 'whole phrase', value: 'phrase' },
-          ]" />
+          <q-input v-model="clipSearch.title.search" label="Clip Title">
+            <template #after>
+              <q-select dense outlined v-model="clipSearch.title.match" emit-value map-options :options="[
+                { label: 'Any word', value: 'any' },
+                { label: 'All words', value: 'all' },
+                { label: 'Whole phrase', value: 'phrase' },
+              ]" />
+            </template>
+          </q-input>
         </q-form>
       </q-scroll-area>
     </q-drawer>
 
-    <div class="q-mb-xl" v-if="clipData.length">
+    <div v-if="clipData.length">
       <q-banner v-if="!filteredClipData.length" class="bg-error">
         There are no clips based on the search criteria you selected.
       </q-banner>
 
       <div class="row q-col-gutter-md q-ma-md">
-        <div v-for="clip in paginatedClipData" :key="clip.id" class="col-4">
+        <div v-for="clip in paginatedClipData" :key="clip.id" class="col-sm-12 col-md-6 col-lg-4 col-xl-3">
           <q-card>
             <a :href="clip.url" target="_blank">
               <q-img class="clip-img" :src="clip.thumbnail_url">
@@ -78,8 +84,8 @@
         </div>
       </div>
 
-      <q-pagination class="flex flex-center" v-model="currentPage" :max="Math.ceil(filteredClipData.length / PAGE_SIZE)"
-        boundary-numbers direction-links max-pages="10" />
+      <q-pagination class="flex flex-center q-mb-md" v-model="currentPage"
+        :max="Math.ceil(filteredClipData.length / PAGE_SIZE)" boundary-numbers direction-links max-pages="10" />
     </div>
   </q-page>
 </template>
@@ -122,7 +128,7 @@ const clipSearch = ref({
     match: 'any' as 'any' | 'all' | 'phrase'
   }
 })
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 12;
 const currentPage = ref(1);
 const games = ref<{ [key: string]: TwitchGame }>({});
 
