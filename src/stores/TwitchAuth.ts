@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { StorageSerializers, useStorage } from '@vueuse/core';
-import twitchApi, { getUsers, TwitchUser } from 'src/api/twitch';
+import { getUsers, setTwitchAuth, TwitchUser } from 'src/api/twitch';
 import { computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -24,8 +24,7 @@ export default defineStore('TwitchAuth', () => {
 
   async function getCurrentUser() {
     if (token.value) {
-      twitchApi.defaults.headers['Authorization'] = 'Bearer ' + token.value;
-      twitchApi.defaults.headers['Client-ID'] = CLIENT_ID;
+      setTwitchAuth(CLIENT_ID, token.value);
       const response = await getUsers();
       currentUser.value = response[0];
     }

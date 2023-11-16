@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-ma-xl q-gutter-md">
+  <q-page class="q-ma-xl q-gutter-md page-width">
     <div class="text-h4">Chat-Based Twitch Timer</div>
     <p>
       A timer that counts either down in your Twitch chat. Control the timer on this page. This page
@@ -11,80 +11,36 @@
     <q-form ref="form" v-show="!isTimerRunning">
       <div class="text-h5 q-my-md">Configuration</div>
       <twitch-signin v-model="config.twitchAuth" @update:model-value="autofillChannel" />
-      <twitch-channel-selection
-        v-model="config.channelName"
-        v-model:user-id="config.twitchUserId"
-        label="Twitch Channel"
-        hint="Twitch Channel to send timing messages to"
-      />
+      <twitch-channel-selection v-model="config.channelName" v-model:user-id="config.twitchUserId" label="Twitch Channel"
+        hint="Twitch Channel to send timing messages to" required />
 
       <div class="q-gutter-md row">
         <q-input type="number" v-model.number="config.totalTime.minutes" suffix="minutes" />
         <q-input type="number" v-model.number="config.totalTime.seconds" suffix="seconds" />
       </div>
 
-      <q-input
-        type="number"
-        v-model.number="config.countdownSeconds"
-        label="Countdown Time (seconds)"
-        hint="Number of seconds to count down before starting the actual timer"
-      />
-      <q-field
-        label="Message Interval (seconds)"
-        v-model="config.messageIntervalSeconds"
-        hint="Send a chat message every this many seconds"
-      >
-        <q-slider
-          v-model="config.messageIntervalSeconds"
-          :min="5"
-          :max="120"
-          :step="5"
-          snap
-          label
-          label-always
-        />
+      <q-input type="number" v-model.number="config.countdownSeconds" label="Countdown Time (seconds)"
+        hint="Number of seconds to count down before starting the actual timer" />
+      <q-field label="Message Interval (seconds)" v-model="config.messageIntervalSeconds"
+        hint="Send a chat message every this many seconds">
+        <q-slider v-model="config.messageIntervalSeconds" :min="5" :max="120" :step="5" snap label label-always />
       </q-field>
-      <q-field
-        label="Final Countdown Time (seconds)"
-        v-model="config.finalCountdownSeconds"
-        hint="Send a chat message every second during the last few seconds"
-      >
-        <q-slider
-          v-model="config.finalCountdownSeconds"
-          :min="0"
-          :max="15"
-          snap
-          label
-          label-always
-        />
+      <q-field label="Final Countdown Time (seconds)" v-model="config.finalCountdownSeconds"
+        hint="Send a chat message every second during the last few seconds">
+        <q-slider v-model="config.finalCountdownSeconds" :min="0" :max="15" snap label label-always />
       </q-field>
-      <q-checkbox
-        v-model="config.useAnnounce"
-        label="Send messages as announcements by prepending /announce"
-      />
+      <q-checkbox v-model="config.useAnnounce" label="Send messages as announcements by prepending /announce" />
     </q-form>
 
     <div class="q-mt-lg">
       <q-btn-group>
-        <q-btn
-          v-if="!isTimerRunning"
-          color="primary"
-          :icon="ionTimerOutline"
-          @click="startTimer"
-          :disabled="!config.twitchAuth || !config.channelName"
-          >Start Timer</q-btn
-        >
+        <q-btn v-if="!isTimerRunning" color="primary" :icon="ionTimerOutline" @click="startTimer"
+          :disabled="!config.twitchAuth || !config.channelName">Start Timer</q-btn>
       </q-btn-group>
       <div v-if="isTimerRunning">
         <q-banner class="bg-info text-white">
           <template v-slot:avatar>
-            <q-circular-progress
-              :value="timeRemainingSec!"
-              :min="0"
-              :max="totalSeconds"
-              size="48px"
-              color="orange"
-            />
+            <q-circular-progress :value="timeRemainingSec!" :min="0" :max="totalSeconds" size="48px" color="orange" />
           </template>
           <div>
             Timer is running! Time remaining:
@@ -94,9 +50,7 @@
             Last chat message sent at: <code class="text-h4">{{ formatTime(lastSentTime) }}</code>
           </div>
           <template v-slot:action>
-            <q-btn color="negative" :icon="ionStopCircleOutline" @click="stopTimer"
-              >Stop Timer Now</q-btn
-            >
+            <q-btn color="negative" :icon="ionStopCircleOutline" @click="stopTimer">Stop Timer Now</q-btn>
           </template>
         </q-banner>
       </div>

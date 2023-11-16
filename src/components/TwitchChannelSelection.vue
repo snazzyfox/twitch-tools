@@ -1,35 +1,14 @@
 <template>
-  <q-select
-    label="Twitch Channel"
-    use-input
-    option-value="id"
-    :input-debounce="200"
-    :disable="!store.isSignedIn"
-    :options="filteredChannelsData"
-    :model-value="modelValue"
-    @update:model-value="handleSelectUser"
-    @filter="handleFilter"
-    @new-value="handleNewChannel"
-    :rules="[(val) => !!val || 'You must select a channel.']"
-  >
+  <q-select label="Twitch Channel" use-input option-value="id" :input-debounce="200" :disable="!store.isSignedIn"
+    :options="filteredChannelsData" :model-value="modelValue" @update:model-value="handleSelectUser"
+    @filter="handleFilter" @new-value="handleNewChannel" :clearable="props.clearable"
+    :rules="[(val) => !required || !!val || 'You must select a channel.']">
     <template #selected>
       <user-label v-if="user" :name="user.display_name" :image-src="user.profile_image_url" dense />
     </template>
     <template #option="{ itemProps, opt }">
-      <user-label
-        :name="opt.display_name"
-        :image-src="opt.profile_image_url"
-        v-bind="itemProps"
-        dense
-      >
-        <q-btn
-          flat
-          round
-          class="float-right"
-          size="sm"
-          :icon="ionCloseOutline"
-          @click.stop="handleRemoveUser(opt.id)"
-        />
+      <user-label :name="opt.display_name" :image-src="opt.profile_image_url" v-bind="itemProps" dense>
+        <q-btn flat round class="float-right" size="sm" :icon="ionCloseOutline" @click.stop="handleRemoveUser(opt.id)" />
       </user-label>
     </template>
   </q-select>
@@ -46,6 +25,8 @@ import { ionCloseOutline } from '@quasar/extras/ionicons-v6';
 
 const props = defineProps<{
   modelValue?: string;
+  clearable?: boolean;
+  required?: boolean;
 }>();
 const emit = defineEmits(['update:modelValue', 'update:userId']);
 

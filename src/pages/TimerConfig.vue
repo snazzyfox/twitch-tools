@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-ma-xl q-gutter-md">
+  <q-page class="q-ma-xl q-gutter-md page-width">
     <div class="text-h4">Twitch Timer</div>
     <p>
       A timer that counts either up or down on your stream that can be controlled by people in chat.
@@ -49,18 +49,12 @@
     <q-form ref="form">
       <div class="text-h5 q-my-md">Configuration</div>
       <twitch-signin v-model="config.twitchAuth" @update:model-value="autofillChannel" />
-      <twitch-channel-selection
-        v-model="config.channelName"
-        label="Twitch Channel"
-        hint="Twitch Channel to listen for message in"
-      />
+      <twitch-channel-selection v-model="config.channelName" label="Twitch Channel"
+        hint="Twitch Channel to listen for message in" required />
 
-      <q-select
-        label="Minimum User Role to Use Timer"
-        hint="Commands from users without at least the selected permissions will be ignored"
-        v-model="config.minRole"
-        :options="['broadcaster', 'moderator', 'vip', 'subscriber']"
-      />
+      <q-select label="Minimum User Role to Use Timer"
+        hint="Commands from users without at least the selected permissions will be ignored" v-model="config.minRole"
+        :options="['broadcaster', 'moderator', 'vip', 'subscriber']" />
 
       <div class="text-h5 q-my-md">Customization</div>
 
@@ -77,58 +71,19 @@
         </q-field>
       </div>
       <div class="q-gutter-sm row">
-        <font-picker
-          class="col-4"
-          v-model="config.font.time"
-          label="Timer Font"
-          preview-text="1:23:45"
-        />
-        <slider-field
-          class="col-3"
-          label="Timer Font Size"
-          unit="px"
-          v-model="config.size.time"
-          :min="8"
-          :max="300"
-        />
-        <slider-field
-          class="col-3"
-          label="Timer Line Height"
-          unit="em"
-          v-model="config.size.timeLineHeight"
-          :min="0.1"
-          :max="3.0"
-          :step="0.05"
-        />
+        <font-picker class="col-4" v-model="config.font.time" label="Timer Font" preview-text="1:23:45" />
+        <slider-field class="col-3" label="Timer Font Size" unit="px" v-model="config.size.time" :min="8" :max="300" />
+        <slider-field class="col-3" label="Timer Line Height" unit="em" v-model="config.size.timeLineHeight" :min="0.1"
+          :max="3.0" :step="0.05" />
       </div>
       <div class="q-gutter-sm row">
         <font-picker class="col-4" v-model="config.font.title" label="Title Font" />
-        <slider-field
-          class="col-3"
-          label="Title Font Size"
-          unit="px"
-          v-model="config.size.title"
-          :min="8"
-          :max="120"
-        />
-        <slider-field
-          class="col-3"
-          label="Title Line Height"
-          unit="em"
-          v-model="config.size.titleLineHeight"
-          :min="0.1"
-          :max="3.0"
-          :step="0.05"
-        />
+        <slider-field class="col-3" label="Title Font Size" unit="px" v-model="config.size.title" :min="8" :max="120" />
+        <slider-field class="col-3" label="Title Line Height" unit="em" v-model="config.size.titleLineHeight" :min="0.1"
+          :max="3.0" :step="0.05" />
       </div>
-      <slider-field
-        label="Flashing Animation Speed"
-        unit="ms"
-        v-model="config.animationSpeed"
-        :min="200"
-        :max="4000"
-        :step="100"
-      />
+      <slider-field label="Flashing Animation Speed" unit="ms" v-model="config.animationSpeed" :min="200" :max="4000"
+        :step="100" />
     </q-form>
     <div class="text-h5 q-my-md">Preview</div>
     <resizable-preview v-if="config.channelName" :default-width="820" :default-height="590">

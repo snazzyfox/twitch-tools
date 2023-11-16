@@ -31,6 +31,11 @@ const routes: RouteRecordRaw[] = [
         path: '/chat-timer',
         component: () => import('pages/ChatTimer.vue'),
       },
+      {
+        name: 'ClipSearch',
+        path: '/clip-search',
+        component: () => import('pages/ClipSearch.vue'),
+      },
     ],
   },
   {

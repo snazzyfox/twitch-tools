@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-ma-xl q-gutter-md">
+  <q-page class="q-ma-xl q-gutter-md page-width">
     <h5>DVD Bounce</h5>
     <p>
       A simple small tool that lets you bounce an image around the screen. No built-in integration -
@@ -14,25 +14,12 @@
         <a href="https://bashupload.com">bashupload.com</a>. They will delete your image as soon as
         it's used once, so your widget URL will only be valid in the first browser you load it in.
       </q-banner>
-      <q-uploader
-        label="Image File"
-        url="https://bashupload.com"
-        auto-upload
-        field-name="file"
-        accept="image/*"
-        @uploaded="handleFileUploaded"
-      />
+      <q-uploader label="Image File" url="https://bashupload.com" auto-upload field-name="file" accept="image/*"
+        @uploaded="handleFileUploaded" />
 
       <h5>Customization</h5>
       <slider-field label="Image Size" :min="1" :max="100" unit="%" v-model="config.size" />
-      <slider-field
-        label="Animation Speed"
-        :min="0.1"
-        :max="10"
-        :step="0.05"
-        unit="px"
-        v-model="config.speed"
-      />
+      <slider-field label="Animation Speed" :min="0.1" :max="10" :step="0.05" unit="px" v-model="config.speed" />
     </q-form>
     <h5>Preview</h5>
     <resizable-preview :default-width="800" :default-height="400">

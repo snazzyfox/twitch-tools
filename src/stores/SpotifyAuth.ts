@@ -2,11 +2,11 @@ import { defineStore } from 'pinia';
 import { StorageSerializers, useStorage } from '@vueuse/core';
 import { computed, ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import ky from 'ky';
 import SpotifyWebApi from 'spotify-web-api-js';
 
-const spotifyOauthApi = axios.create({
-  baseURL: 'https://accounts.spotify.com/api/',
+const spotifyOauthApi = ky.create({
+  prefixUrl: 'https://accounts.spotify.com/api/',
 });
 const spotify = new SpotifyWebApi();
 export type SpotifyCurrentUser = Awaited<ReturnType<SpotifyWebApi.SpotifyWebApiJs['getMe']>>;
@@ -84,16 +84,19 @@ export default defineStore('SpotifyAuth', () => {
   async function getToken(params: { [key: string]: string }) {
     if (auth.value) {
       const formData = new URLSearchParams(params);
-      const response = await spotifyOauthApi.post('/token', formData, {
-        headers: {
-          Authorization: 'Basic ' + btoa(auth.value.clientId + ':' + auth.value.clientSecret),
-        },
-      });
-      auth.value.token = response.data.access_token;
-      if (response.data.refresh_token) {
-        auth.value.refreshToken = response.data.refresh_token;
+      const response = await spotifyOauthApi
+        .post('token', {
+          body: formData,
+          headers: {
+            Authorization: 'Basic ' + btoa(auth.value.clientId + ':' + auth.value.clientSecret),
+          },
+        })
+        .json<{ access_token: string; refresh_token: string }>();
+      auth.value.token = response.access_token;
+      if (response.refresh_token) {
+        auth.value.refreshToken = response.refresh_token;
       }
-      spotify.setAccessToken(response.data.access_token);
+      spotify.setAccessToken(response.access_token);
     }
   }
 
