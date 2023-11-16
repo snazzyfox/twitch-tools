@@ -1,7 +1,8 @@
 <template>
   <q-select label="Twitch Game" use-input option-value="id" :input-debounce="200" :disable="!store.isSignedIn"
     :options="filteredGamesData" :model-value="modelValue" @update:model-value="handleSelectGame" @filter="handleFilter"
-    @new-value="handleNewGame" :rules="[(val) => !!val || 'You must select a game.']">
+    @new-value="handleNewGame" :clearable="props.clearable"
+    :rules="[(val) => !required || !val || 'You must select a game.']">
     <template #selected>
       <user-label v-if="game" :name="game.name" :image-src="game.box_art_url" dense />
     </template>
@@ -24,6 +25,8 @@ import { ionCloseOutline } from '@quasar/extras/ionicons-v6';
 
 const props = defineProps<{
   modelValue?: string;
+  clearable?: boolean;
+  required?: boolean;
 }>();
 const emit = defineEmits(['update:modelValue', 'update:gameName']);
 
