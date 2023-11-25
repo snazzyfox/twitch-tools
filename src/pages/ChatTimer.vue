@@ -59,10 +59,7 @@
           label-always
         />
       </q-field>
-      <q-checkbox
-        v-model="config.useAnnounce"
-        label="Send messages as announcements by prepending /announce"
-      />
+      <q-checkbox v-model="config.useAnnounce" label="Send messages as announcements." />
     </q-form>
 
     <div class="q-mt-lg">
@@ -114,7 +111,7 @@ import { useStorage } from '@vueuse/core';
 import TwitchChannelSelection from 'src/components/TwitchChannelSelection.vue';
 
 import { ionTimerOutline, ionStopCircleOutline } from '@quasar/extras/ionicons-v6';
-import ComfyJS from 'comfy.js';
+import tmi from 'tmi.js';
 import { sendAnnouncement } from 'src/api/twitch';
 
 interface ChatTimerOptions {
@@ -146,6 +143,7 @@ const totalSeconds = computed(
 const timeRemainingSec = ref<number | null>(null);
 const lastSentTime = ref<number | null>(null);
 let interval: number | undefined;
+let client: tmi.Client;
 
 onMounted(() => {
   if (config.value.timerEndTime) {
@@ -200,7 +198,7 @@ async function send(message: string) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await sendAnnouncement(config.value.twitchUserId!.toString(), message);
   } else {
-    ComfyJS.Say(message, config.value.channelName);
+    client.say(config.value.channelName, message);
   }
 }
 
@@ -210,22 +208,27 @@ function startTimer() {
   runTimer();
 }
 
-function runTimer() {
-  if (!config.value.useAnnounce) {
-    ComfyJS.Init(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      config.value.twitchAuth!.username,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      config.value.twitchAuth!.token,
-      config.value.channelName
-    );
+async function runTimer() {
+  if (!config.value.useAnnounce && config.value.twitchAuth) {
+    client = new tmi.Client({
+      identity: {
+        username: config.value.twitchAuth.username,
+        password: 'oauth:' + config.value.twitchAuth.token,
+      },
+      channels: [config.value.channelName],
+      options: {
+        skipMembership: true,
+        skipUpdatingEmotesets: true,
+      },
+    });
+    await client.connect();
   }
   interval = window.setInterval(postTimeRemaining, 500);
 }
 
-function stopTimer() {
+async function stopTimer() {
   if (!config.value.useAnnounce) {
-    ComfyJS.Disconnect();
+    await client.disconnect();
   }
   config.value.timerEndTime = null;
   timeRemainingSec.value = null;

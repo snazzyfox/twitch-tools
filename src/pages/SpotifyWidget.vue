@@ -60,7 +60,7 @@ import SpotifyWebApi from 'spotify-web-api-js';
 import MarqueeText from 'src/components/MarqueeText.vue';
 import { useStorage } from '@vueuse/core';
 import authStore from 'src/stores/SpotifyAuth';
-import ComfyJS from 'comfy.js';
+import { TmiClientWrapper } from 'src/api/twitch';
 
 export interface SpotifyWidgetOptions {
   preview?: boolean;
@@ -112,7 +112,32 @@ const MAX_POLL_INTERVAL = 5000;
 const PROGRESS_UPDATE_INTERVAL = 500;
 let timeoutId: number | undefined;
 let intervalId: number | undefined;
-let comfyJsConnected = false;
+const chat = new TmiClientWrapper();
+
+chat.on('chat', async (channel, userstate, message) => {
+  const [command] = message.split(/\s+/, 1);
+  console.log(command);
+  if (
+    props.twitchBot.commands.info.enabled &&
+    command === '!' + props.twitchBot.commands.info.text
+  ) {
+    const user = userstate['display-name']!;
+    if (playbackState.value) {
+      await chat.say(
+        props.twitchBot.channelName,
+        `@${user} -> now playing ${playbackState.value.item.name} by ${artistNames.value} on Spotify: ${playbackState.value.item.external_urls.spotify}`
+      );
+    } else {
+      await chat.say(
+        props.twitchBot.channelName,
+        `@${user} -> nothing is playing on Spotify at the moment.`
+      );
+    }
+  }
+  if (props.twitchBot.commands.show.enabled && command === props.twitchBot.commands.show.text) {
+    showPlayer();
+  }
+});
 
 onMounted(() => {
   if (props.preview) {
@@ -143,12 +168,10 @@ onMounted(() => {
   }
 });
 
-onUnmounted(() => {
-  if (comfyJsConnected) {
-    ComfyJS.Disconnect();
-  }
+onUnmounted(async () => {
   window.clearTimeout(timeoutId);
   window.clearInterval(intervalId);
+  await chat.disconnect();
 });
 
 function startSpotifyBot() {
@@ -246,30 +269,12 @@ function handleResize(newSize: { height: number }) {
 
 async function startTwitchBot() {
   if (props.twitchBot.twitchAuth) {
-    ComfyJS.onConnected = () => (comfyJsConnected = true);
-    ComfyJS.onCommand = (user, command) => {
-      if (props.twitchBot.commands.info.enabled && command === props.twitchBot.commands.info.text) {
-        if (playbackState.value) {
-          ComfyJS.Say(
-            `@${user} -> now playing ${playbackState.value.item.name} by ${artistNames.value} on Spotify: ${playbackState.value.item.external_urls.spotify}`,
-            props.twitchBot.channelName
-          );
-        } else {
-          ComfyJS.Say(
-            `@${user} -> nothing is playing on Spotify at the moment.`,
-            props.twitchBot.channelName
-          );
-        }
-      }
-      if (props.twitchBot.commands.show.enabled && command === props.twitchBot.commands.show.text) {
-        showPlayer();
-      }
-    };
-    ComfyJS.Init(
+    chat.setAuth(
+      [props.twitchBot.channelName],
       props.twitchBot.twitchAuth.username,
-      props.twitchBot.twitchAuth.token,
-      props.twitchBot.channelName
+      props.twitchBot.twitchAuth.token
     );
+    await chat.connect();
   }
 }
 </script>

@@ -13,7 +13,8 @@
 import { useStorage } from '@vueuse/core';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useFont } from 'src/components/FontPickerUtils';
-import ComfyJs, { OnMessageFlags } from 'comfy.js';
+import { TmiClientWrapper } from 'src/api/twitch';
+import { ChatUserstate } from 'tmi.js';
 
 export interface TimerWidgetOptions {
   preview?: boolean;
@@ -58,8 +59,30 @@ const props = defineProps<TimerWidgetOptions>();
 const timerData = useStorage<TimerData[]>('timer.state', []);
 const state = ref<TimerState[]>([]);
 const COMMAND_COOLDOWN_MS = 5000;
-let connected = false;
 let cooldownUntil = 0;
+const chat = new TmiClientWrapper();
+
+chat.on('chat', async (channel, userstate, message, self) => {
+  const [command] = message.split(/\s+/, 1);
+  if (!self && command === '!timer') {
+    if (!hasPermissions(userstate)) {
+      await reply(userstate.username!, "You don't have permissions to do that.");
+      return;
+    }
+    const now = Date.now();
+    if (cooldownUntil > now) return;
+    const [, firstToken, ...restTokens] = message.split(/\s+/);
+    const title = restTokens.length ? restTokens.join(' ') : '';
+    let error;
+    if (firstToken === 'off') {
+      error = removeTimer(title);
+    } else {
+      error = addTimer(firstToken, title);
+    }
+    if (error) reply(userstate.username!, error);
+    cooldownUntil = now + COMMAND_COOLDOWN_MS;
+  }
+});
 
 let interval = -1;
 onMounted(async () => {
@@ -71,63 +94,39 @@ onMounted(async () => {
     ];
   } else {
     interval = window.setInterval(updateState, 500);
-    if (props.twitchAuth) {
-      ComfyJs.Init(props.twitchAuth.username, props.twitchAuth.token, props.channelName);
-    } else {
-      ComfyJs.Init(props.channelName);
-    }
+    chat.setAuth([props.channelName], props.twitchAuth?.username, props.twitchAuth?.token);
+    await chat.connect();
   }
 });
 
-onUnmounted(() => {
+onUnmounted(async () => {
   clearInterval(interval);
-  if (connected) ComfyJs.Disconnect();
+  await chat.disconnect();
 });
 
 useFont(props.font?.time || 'Digital-7 Mono');
 useFont(props.font?.title || 'Bebas Neue');
 
-function hasPermissions(userFlags: OnMessageFlags) {
+function hasPermissions(userstate: ChatUserstate) {
   switch (props.minRole) {
     case 'broadcaster':
-      return userFlags.broadcaster;
+      return !!userstate.badges?.broadcaster;
     case 'moderator':
-      return userFlags.broadcaster || userFlags.mod;
+      return !!userstate.badges?.broadcaster || userstate.mod || false;
     case 'vip':
-      return userFlags.broadcaster || userFlags.mod || userFlags.vip;
+      return !!userstate.badges?.broadcaster || userstate.mod || userstate.vip;
     case 'subscriber':
-      return userFlags.broadcaster || userFlags.mod || userFlags.vip || userFlags.subscriber;
+      return (
+        !!userstate.badges?.broadcaster || userstate.mod || userstate.vip || userstate.subscriber
+      );
   }
 }
 
-function reply(user: string, message: string) {
+async function reply(user: string, message: string) {
   if (props.twitchAuth) {
-    ComfyJs.Say(`@${user} -> ${message}`, props.channelName);
+    await chat.say(props.channelName, `@${user} -> ${message}`);
   }
 }
-
-ComfyJs.onCommand = (user, command, message, flags) => {
-  if (command == 'timer') {
-    if (!hasPermissions(flags)) {
-      reply(user, "You don't have permissions to do that.");
-      return;
-    }
-    const now = Date.now();
-    if (cooldownUntil > now) return;
-    const [firstToken, ...restTokens] = message.split(/\s+/);
-    const title = restTokens.length ? restTokens.join(' ') : '';
-    let error;
-    if (firstToken === 'off') {
-      error = removeTimer(title);
-    } else {
-      error = addTimer(firstToken, title);
-    }
-    if (error) reply(user, error);
-    cooldownUntil = now + COMMAND_COOLDOWN_MS;
-  }
-};
-
-ComfyJs.onConnected = () => (connected = true);
 
 /** Update the state timers are drawn based on */
 function updateState() {

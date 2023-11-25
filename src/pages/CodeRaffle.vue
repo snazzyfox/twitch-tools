@@ -256,12 +256,13 @@ import {
   ionSendOutline,
 } from '@quasar/extras/ionicons-v6';
 import { useStorage } from '@vueuse/core';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { QScrollArea, useQuasar } from 'quasar';
 import { mdiSword } from '@quasar/extras/mdi-v7';
 import { computed } from 'vue';
-import tmi from 'tmi.js';
+import { TmiClientWrapper } from 'src/api/twitch';
 import { sendWhisper } from 'src/api/twitch';
+import { HTTPError } from 'ky';
 
 type ChatRole = 'none' | 'sub' | 'vip' | 'mod';
 
@@ -344,20 +345,50 @@ const displayedUsers = computed(() =>
       user.username.toLowerCase().includes(filterText.value.toLowerCase().trim())
   )
 );
+const chat = new TmiClientWrapper();
 
-let client: tmi.Client;
-watch([() => config.value.twitchAuth, () => config.value.channelName], async () => {
-  client = new tmi.Client({
-    channels: [config.value.channelName],
-    identity: {
-      username: config.value.twitchAuth?.username,
-      password: 'oauth:' + config.value.twitchAuth?.token,
-    },
-    options: {
-      skipUpdatingEmotesets: true,
-      skipMembership: true,
-    },
-  });
+chat.on('chat', (channel, userstate, message, self) => {
+  if (
+    !self &&
+    entryOpen.value &&
+    message === '!' + config.value.command &&
+    userstate['display-name']
+  ) {
+    if (!config.value.entries.find((u) => u.username === userstate['display-name'])) {
+      let prob = config.value.luck.none,
+        roles: ChatRole[] = [];
+      if (userstate.mod) {
+        prob = Math.max(prob, config.value.luck.mod);
+        roles.push('mod');
+      }
+      if (userstate.vip) {
+        prob = Math.max(prob, config.value.luck.vip);
+        roles.push('vip');
+      }
+      if (userstate.subscriber) {
+        prob = Math.max(prob, config.value.luck.sub);
+        roles.push('sub');
+      }
+      if (
+        config.value.dynamicLuck.decreaseMode === 'once' &&
+        config.value.previousEntryCounts[userstate['display-name']]
+      ) {
+        prob *= 1.0 - config.value.dynamicLuck.decreaseFactor;
+      } else if (config.value.dynamicLuck.decreaseMode === 'stacked') {
+        const wins = config.value.previousEntryCounts[userstate['display-name']] ?? 0;
+        prob *= Math.pow(1.0 - config.value.dynamicLuck.decreaseFactor, wins);
+      }
+
+      config.value.entries.push({
+        username: userstate['display-name'],
+        userId: userstate['user-id'] as string,
+        joinTime: new Date().toLocaleTimeString(),
+        roles,
+        prob,
+      });
+      userListScroll.value?.setScrollPercentage('vertical', 1, 100);
+    }
+  }
 });
 
 function clearHistory() {
@@ -380,54 +411,16 @@ async function startEntry() {
     });
     return;
   }
-  client.on('chat', (channel, userstate, message, self) => {
-    if (
-      !self &&
-      entryOpen.value &&
-      message === '!' + config.value.command &&
-      userstate['display-name']
-    ) {
-      if (!config.value.entries.find((u) => u.username === userstate['display-name'])) {
-        let prob = config.value.luck.none,
-          roles: ChatRole[] = [];
-        if (userstate.mod) {
-          prob = Math.max(prob, config.value.luck.mod);
-          roles.push('mod');
-        }
-        if (userstate.vip) {
-          prob = Math.max(prob, config.value.luck.vip);
-          roles.push('vip');
-        }
-        if (userstate.subscriber) {
-          prob = Math.max(prob, config.value.luck.sub);
-          roles.push('sub');
-        }
-        if (
-          config.value.dynamicLuck.decreaseMode === 'once' &&
-          config.value.previousEntryCounts[userstate['display-name']]
-        ) {
-          prob *= 1.0 - config.value.dynamicLuck.decreaseFactor;
-        } else if (config.value.dynamicLuck.decreaseMode === 'stacked') {
-          const wins = config.value.previousEntryCounts[userstate['display-name']] ?? 0;
-          prob *= Math.pow(1.0 - config.value.dynamicLuck.decreaseFactor, wins);
-        }
-
-        config.value.entries.push({
-          username: userstate['display-name'],
-          userId: userstate['user-id'] as string,
-          joinTime: new Date().toLocaleTimeString(),
-          roles,
-          prob,
-        });
-        userListScroll.value?.setScrollPercentage('vertical', 1, 100);
-      }
-    }
-  });
 
   try {
-    await client.connect();
+    chat.setAuth(
+      [config.value.channelName],
+      config.value.twitchAuth?.username,
+      config.value.twitchAuth?.token
+    );
+    await chat.connect();
     if (config.value.message.open) {
-      await client.say(config.value.channelName, config.value.message.open);
+      await chat.say(config.value.channelName, config.value.message.open);
     }
   } catch (error) {
     quasar.notify({
@@ -441,7 +434,7 @@ async function startEntry() {
 
 async function stopEntry() {
   if (config.value.message.closed) {
-    await client.say(config.value.channelName, config.value.message.closed);
+    await chat.say(config.value.channelName, config.value.message.closed);
   }
   entryOpen.value = false;
 }
@@ -475,10 +468,11 @@ async function sendWhisperMessage(userId: string) {
     // use a direct call because all twitch libs still use the old /w command that twitch no longer supports.
     await sendWhisper(userId, config.value.message.whisper.replace('$SECRET', config.value.secret));
   } catch (error) {
-    quasar.notify({
-      message: `Failed whispering ${userId}, error: ${error}`,
-      color: 'negative',
-    });
+    let reason = `${error}`;
+    if (error instanceof HTTPError) {
+      reason = (await error.response.json()).message;
+    }
+    quasar.notify({ message: 'Error whispering user: ' + reason, color: 'negative' });
   }
 }
 
@@ -487,13 +481,14 @@ async function confirm() {
   config.value.status = 'sending';
   await Promise.all(config.value.pendingEntries.map((u) => sendWhisperMessage(u.userId)));
   if (config.value.message.winners) {
-    client.say(
+    chat.say(
       config.value.channelName,
-      config.value.message.winners.replace('$WINNERS', config.value.pendingEntries.join(', '))
+      config.value.message.winners.replace(
+        '$WINNERS',
+        config.value.pendingEntries.map((e) => e.username).join(', ')
+      )
     );
   }
   config.value.status = 'confirmed';
 }
 </script>
-
-<style scoped lang="sass"></style>

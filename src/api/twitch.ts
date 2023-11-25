@@ -1,5 +1,6 @@
 import ky, { KyResponse } from 'ky';
 import twitchAuthStore from 'src/stores/TwitchAuth';
+import tmi from 'tmi.js';
 
 export type ClipID = { broadcaster_id: string } | { game_id: string } | { id: string[] };
 
@@ -158,5 +159,23 @@ export async function sendWhisper(user_id: string, message: string) {
   if (store.currentUser) {
     const searchParams = { from_user_id: store.currentUser.id, to_user_id: user_id };
     await twitchApi.post('whispers', { json: { message }, searchParams });
+  }
+}
+
+export class TmiClientWrapper extends tmi.Client {
+  protected opts!: tmi.Options;
+
+  constructor() {
+    super({
+      options: {
+        skipMembership: true,
+        skipUpdatingEmotesets: true,
+      },
+    });
+  }
+
+  public setAuth(channels: string[], username?: string, token?: string) {
+    this.opts.channels = channels;
+    this.opts.identity = username && token ? { username, password: 'oauth:' + token } : {};
   }
 }
