@@ -36,6 +36,11 @@ const routes: RouteRecordRaw[] = [
         path: '/clip-search',
         component: () => import('pages/ClipSearch.vue'),
       },
+      {
+        name: 'CodeRaffle',
+        path: '/code-raffle',
+        component: () => import('pages/CodeRaffle.vue'),
+      },
     ],
   },
   {

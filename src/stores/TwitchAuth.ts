@@ -37,7 +37,7 @@ export default defineStore('TwitchAuth', () => {
       client_id: CLIENT_ID,
       response_type: 'token',
       redirect_uri: REDIRECT_URI,
-      scope: 'chat:read chat:edit moderator:manage:announcements',
+      scope: 'chat:read chat:edit moderator:manage:announcements user:manage:whispers',
       state: signinState.value,
     });
     return base + params.toString();

@@ -9,6 +9,7 @@
         :max="max"
         :step="step"
         :disable="disable"
+        label
       />
       <input
         class="no-border col-3 vertical-middle"

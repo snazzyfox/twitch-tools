@@ -14,7 +14,6 @@ import { useStorage } from '@vueuse/core';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useFont } from 'src/components/FontPickerUtils';
 import ComfyJs, { OnMessageFlags } from 'comfy.js';
-import ComfyJS from 'comfy.js';
 
 export interface TimerWidgetOptions {
   preview?: boolean;
@@ -128,7 +127,7 @@ ComfyJs.onCommand = (user, command, message, flags) => {
   }
 };
 
-ComfyJS.onConnected = () => (connected = true);
+ComfyJs.onConnected = () => (connected = true);
 
 /** Update the state timers are drawn based on */
 function updateState() {

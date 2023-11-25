@@ -3,8 +3,13 @@
     <q-header reveal bordered class="bg-primary text-white" height-hint="90">
       <q-toolbar>
         <q-toolbar-title> <q-icon :name="mdiSword" /> Snazzy's Twitch Tools </q-toolbar-title>
-        <q-btn flat :icon="ionLogoGithub" href="https://github.com/snazzyfox/twitch-tools" target="_blank"
-          label="Github" />
+        <q-btn
+          flat
+          :icon="ionLogoGithub"
+          href="https://github.com/snazzyfox/twitch-tools"
+          target="_blank"
+          label="Github"
+        />
       </q-toolbar>
 
       <q-tabs align="left">
@@ -13,6 +18,7 @@
         <q-route-tab to="/spotify" label="Spotify Overlay" />
         <q-route-tab to="/chat-timer" label="Chat Timer" />
         <q-route-tab to="/clip-search" label="Clip Search" />
+        <q-route-tab to="/code-raffle" label="Code Raffle" />
       </q-tabs>
     </q-header>
 

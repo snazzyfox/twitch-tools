@@ -152,3 +152,11 @@ export async function sendAnnouncement(broadcaster_id: string, message: string, 
     await twitchApi.post('chat/announcements', { json: { message, color }, searchParams });
   }
 }
+
+export async function sendWhisper(user_id: string, message: string) {
+  const store = twitchAuthStore();
+  if (store.currentUser) {
+    const searchParams = { from_user_id: store.currentUser.id, to_user_id: user_id };
+    await twitchApi.post('whispers', { json: { message }, searchParams });
+  }
+}
