@@ -107,12 +107,8 @@
             There are no clips based on the search criteria you selected.
           </q-banner>
 
-          <div class="row q-col-gutter-md q-ma-md">
-            <div
-              v-for="clip in paginatedClipData"
-              :key="clip.id"
-              class="col-sm-12 col-md-6 col-lg-4 col-xl-3"
-            >
+          <div class="q-ma-md clip-card-container">
+            <div v-for="clip in paginatedClipData" :key="clip.id">
               <q-card>
                 <a :href="clip.url" target="_blank">
                   <q-img class="clip-img" :src="clip.thumbnail_url">
@@ -122,25 +118,22 @@
                 <q-card-section class="row q-gutter-md align-center">
                   <q-img class="game-img col-2" :src="games[clip.game_id]?.box_art_url" />
                   <div class="col">
-                    <div>
-                      <q-icon :name="ionGameControllerOutline" /> {{ games[clip.game_id]?.name }}
-                    </div>
-                    <div>
-                      <q-icon :name="ionTvOutline" />
-                      <a :href="'https://www.twitch.tv/' + clip.broadcaster_name" target="_blank">
-                        {{ clip.broadcaster_name }}</a
-                      >
-                    </div>
-                    <div>
-                      <q-icon :name="ionPersonOutline" />
-                      <a :href="'https://www.twitch.tv/' + clip.creator_name" target="_blank">
-                        {{ clip.creator_name }}</a
-                      >
-                    </div>
-                    <div>
-                      <q-icon :name="ionCalendarClearOutline" />
+                    <q-chip :icon="ionGameControllerOutline" dense color="transparent">
+                      {{ games[clip.game_id]?.name }}
+                    </q-chip>
+                    <a :href="'https://www.twitch.tv/' + clip.broadcaster_name" target="_blank">
+                      <q-chip :icon="ionTvOutline" clickable dense color="transparent">
+                        {{ clip.broadcaster_name }}
+                      </q-chip>
+                    </a>
+                    <a :href="'https://www.twitch.tv/' + clip.creator_name" target="_blank">
+                      <q-chip :icon="ionPersonOutline" clickable dense color="transparent">
+                        {{ clip.creator_name }}
+                      </q-chip>
+                    </a>
+                    <q-chip :icon="ionCalendarClearOutline" dense color="transparent">
                       {{ clip.created_at.substring(0, 10) }}
-                    </div>
+                    </q-chip>
                   </div>
                 </q-card-section>
               </q-card>
@@ -205,7 +198,7 @@ const clipSearch = ref({
     match: 'any' as 'any' | 'all' | 'phrase',
   },
 });
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 30;
 const currentPage = ref(1);
 const games = ref<{ [key: string]: TwitchGame }>({});
 const splitLocation = ref(25);
@@ -298,4 +291,9 @@ const paginatedClipData = computed(() =>
 <style scoped lang="sass">
 .clip-img
   width: 100%
+
+.clip-card-container
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr))
+  gap: 1em
 </style>
