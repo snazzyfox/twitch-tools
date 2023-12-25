@@ -66,20 +66,17 @@ chat.on('chat', async (channel, userstate, message, self) => {
   const [command] = message.split(/\s+/, 1);
   if (!self && command === '!timer') {
     if (!hasPermissions(userstate)) {
-      await reply(userstate.username!, "You don't have permissions to do that.");
       return;
     }
     const now = Date.now();
     if (cooldownUntil > now) return;
     const [, firstToken, ...restTokens] = message.split(/\s+/);
     const title = restTokens.length ? restTokens.join(' ') : '';
-    let error;
     if (firstToken === 'off') {
-      error = removeTimer(title);
+      removeTimer(title);
     } else {
-      error = addTimer(firstToken, title);
+      addTimer(firstToken, title);
     }
-    if (error) reply(userstate.username!, error);
     cooldownUntil = now + COMMAND_COOLDOWN_MS;
   }
 });
@@ -94,7 +91,7 @@ onMounted(async () => {
     ];
   } else {
     interval = window.setInterval(updateState, 500);
-    chat.setAuth([props.channelName], props.twitchAuth?.username, props.twitchAuth?.token);
+    chat.setAuth([props.channelName]);
     await chat.connect();
   }
 });
@@ -119,12 +116,6 @@ function hasPermissions(userstate: ChatUserstate) {
       return (
         !!userstate.badges?.broadcaster || userstate.mod || userstate.vip || userstate.subscriber
       );
-  }
-}
-
-async function reply(user: string, message: string) {
-  if (props.twitchAuth) {
-    await chat.say(props.channelName, `@${user} -> ${message}`);
   }
 }
 
