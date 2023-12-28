@@ -23,10 +23,12 @@ export default defineStore('TwitchAuth', () => {
   watch(token, getCurrentUser, { immediate: true });
 
   async function getCurrentUser() {
-    if (token.value) {
-      setTwitchAuth(CLIENT_ID, token.value);
+    try {
+      setTwitchAuth(CLIENT_ID, token.value!);
       const response = await getUsers();
       currentUser.value = response[0];
+    } catch (e) {
+      logout();
     }
   }
 

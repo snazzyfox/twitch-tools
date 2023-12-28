@@ -31,7 +31,11 @@ export default defineStore('SpotifyAuth', () => {
 
   onMounted(async () => {
     if (auth.value?.token) {
-      await getCurrentUser();
+      try {
+        await getCurrentUser();
+      } catch (e) {
+        logout();
+      }
     }
   });
 
