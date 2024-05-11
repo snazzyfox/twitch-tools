@@ -1,7 +1,7 @@
 import ky, { KyResponse } from 'ky';
-import twitchAuthStore from 'src/stores/TwitchAuth';
 import tmi from 'tmi.js';
 
+export const CLIENT_ID = 'ea4ht2mler9y438e2o706g2rsd7jxz';
 export type ClipID = { broadcaster_id: string } | { game_id: string } | { id: string[] };
 
 export interface TwitchResponse<T> {
@@ -60,10 +60,12 @@ export interface TwitchGame {
   igdb_id: string;
 }
 
-let twitchApi = ky.create({
+const twitchApi = ky.create({
   prefixUrl: 'https://api.twitch.tv/helix/',
+  headers: {
+    'Client-ID': CLIENT_ID,
+  },
 });
-export default twitchApi;
 
 function flattenParams(params?: {
   [key: string]: string[] | string | number[] | number | undefined;
@@ -81,15 +83,6 @@ function flattenParams(params?: {
   return searchParams;
 }
 
-export function setTwitchAuth(clientId: string, bearerToken: string) {
-  twitchApi = twitchApi.extend({
-    headers: {
-      Authorization: 'Bearer ' + bearerToken,
-      'Client-ID': clientId,
-    },
-  });
-}
-
 /** For twitch endpoints that returns paginated data, a wrapper function that repeats the request while fetching more data until exhausted. */
 async function getPaginatedData<T>(
   initialResponse: KyResponse,
@@ -99,7 +92,7 @@ async function getPaginatedData<T>(
   const result = responseJson.data;
   const url = new URL(initialResponse.url);
   let cursor = responseJson.pagination?.cursor;
-  while (!!cursor) {
+  while (cursor) {
     url.searchParams.set('after', cursor);
     const response = await twitchApi(url, { headers: initialResponse.headers }).json<
       TwitchResponse<T[]>
@@ -120,10 +113,10 @@ export async function getUsers(params?: { id?: string[]; login?: string[] }) {
     .json<TwitchResponse<TwitchUser[]>>();
   return response.data;
 }
-
+/*
 export async function getFollows(params: { from_id?: string; to_id?: string }) {
   const response = await twitchApi.get('users/follows', { searchParams: params });
-  return await getPaginatedData<TwitchUser>(response);
+  return getPaginatedData<TwitchUser>(response);
 }
 
 export async function getClips(
@@ -132,7 +125,7 @@ export async function getClips(
 ) {
   const searchParams = flattenParams({ ...params, first: 100 });
   const response = await twitchApi.get('clips', { searchParams });
-  return await getPaginatedData<TwitchClip>(response, paginationCallback);
+  return getPaginatedData<TwitchClip>(response, paginationCallback);
 }
 
 export async function getGames(params: { id?: string[]; name?: string[] }) {
@@ -179,3 +172,4 @@ export class TmiClientWrapper extends tmi.Client {
     this.opts.identity = username && token ? { username, password: 'oauth:' + token } : {};
   }
 }
+*/
