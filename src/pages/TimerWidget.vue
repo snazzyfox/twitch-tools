@@ -231,12 +231,12 @@ function removeTimer(title: string) {
   margin-bottom: -0.1em
 
   &.done
+    animation: flash v-bind("$props.animationSpeed + 'ms'") infinite
     @keyframes flash
       0%, 40%
         color: v-bind("$props.colors.time")
       50%, 90%
         color: v-bind("$props.colors.done")
-    animation: flash v-bind("$props.animationSpeed + 'ms'") infinite
 
 .title
   color: v-bind("$props.colors.text")

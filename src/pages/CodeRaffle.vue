@@ -11,9 +11,12 @@
           <div class="text-h4">Code Raffle</div>
           <p>
             Select active chat members randomly as a raffle. Winners are automatically sent a
-            message via a Twitch whisper.
+            message via a Twitch whisper. You must keep this tab open for this tool to function.
           </p>
-          <p class="text-bold">You must keep this tab open for this tool to function!</p>
+          <q-banner class="bg-warning">
+            Twitch limits each account to whispering 40 distinct users per day. This tool will not
+            be able to send messages after that.
+          </q-banner>
           <q-form class="q-mb-md">
             <div class="text-h6">Setup</div>
             <twitch-signin
@@ -479,7 +482,10 @@ async function sendWhisperMessage(userId: string) {
 async function confirm() {
   // Send whispers
   config.value.status = 'sending';
-  await Promise.all(config.value.pendingEntries.map((u) => sendWhisperMessage(u.userId)));
+  config.value.pendingEntries.forEach((u, index) =>
+    // Twitch api allows 3 whispers per second; only run 2/sec in case of rate limiting
+    setTimeout(() => sendWhisperMessage(u.userId), index * 500)
+  );
   if (config.value.message.winners) {
     chat.say(
       config.value.channelName,
